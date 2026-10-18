@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="CS-301 Operating Systems — Module 1: OS Structure & Design.">
+<title>CS-301: Operating Systems — Module 1</title>
+<style>
+:root{--bg:#fafaf9;--surf:#fff;--acc:#1e40af;--acc2:#0f766e;--tx:#1c1917;--mut:#57534e;--bd:#e7e5e4;--warn:#b45309;--warnbg:#fef3c7;--codebg:#f5f5f4;--c-com:#57534e;--c-kw:#1e40af;--c-str:#0f766e;--c-pre:#9a3412;
+--sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+[data-theme=dark]{--bg:#0c0a09;--surf:#1c1917;--acc:#60a5fa;--acc2:#5eead4;--tx:#fafaf9;--mut:#a8a29e;--bd:#292524;--warn:#fcd34d;--warnbg:#451a03;--codebg:#0c0a09;--c-com:#a8a29e;--c-kw:#60a5fa;--c-str:#5eead4;--c-pre:#fdba74}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:4.5rem}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--sans);font-weight:400;line-height:1.5}
+h1,h2,h3{font-family:var(--sans);line-height:1.25}
+a{color:var(--acc)}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+header{position:relative;padding:2rem 1rem 1rem;max-width:1100px;margin:0 auto}
+header h1{margin:0;font-size:clamp(1.6rem,4vw,2.4rem)}
+header .sub{margin:.25rem 0;font-size:1.15rem;color:var(--acc);font-weight:600}
+header .tag{margin:0;color:var(--mut);font-style:italic}
+#theme-toggle{position:absolute;top:1rem;right:1rem;width:2.5rem;height:2.5rem;border:1px solid var(--bd);border-radius:6px;background:var(--surf);color:var(--tx);font-size:1.2rem;cursor:pointer}
+.wrap{max-width:1100px;margin:0 auto;padding:0 1rem 3rem}
+.callout{background:var(--warnbg);color:var(--warn);border:1px solid var(--warn);border-left:6px solid var(--warn);border-radius:8px;padding:1.25rem;margin:1rem 0 2rem}
+.callout h2{margin:0 0 .5rem;font-size:1.25rem}
+.callout p{margin:0;font-size:1.05rem;font-weight:500}
+.modmeta{background:var(--surf);border:1px solid var(--bd);border-radius:8px;padding:1rem;margin-bottom:2rem}
+.modmeta h2{margin:0 0 .5rem;font-size:1.2rem}
+.modmeta p{margin:.35rem 0}
+.layout{display:block}
+nav#toc{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--bd);margin:0 -1rem 1.5rem;padding:.5rem 1rem;overflow-x:auto}
+nav#toc ul{list-style:none;margin:0;padding:0;display:flex;gap:.5rem;white-space:nowrap}
+nav#toc a{display:block;padding:.35rem .8rem;border:1px solid var(--bd);border-radius:6px;background:var(--surf);color:var(--tx);text-decoration:none;font-size:.9rem}
+nav#toc a.active{background:var(--acc);border-color:var(--acc);color:var(--bg);font-weight:600}
+nav#toc .toc-title{display:none}
+@media(min-width:1025px){
+ .layout{display:grid;grid-template-columns:240px 1fr;gap:2rem;align-items:start}
+ nav#toc{top:1rem;margin:0;padding:1rem;border:1px solid var(--bd);border-radius:8px;background:var(--surf);overflow:visible;max-height:calc(100vh - 2rem);overflow-y:auto}
+ nav#toc .toc-title{display:block;margin:0 0 .5rem;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+ nav#toc ul{flex-direction:column;white-space:normal;gap:.25rem}
+ nav#toc a{border:0;background:transparent;border-left:3px solid transparent;border-radius:0 6px 6px 0}
+ nav#toc a.active{background:transparent;color:var(--acc);border-left-color:var(--acc)}
+}
+details.card{background:var(--surf);border:1px solid var(--bd);border-radius:8px;margin-bottom:2rem;transition:box-shadow .2s}
+details.card:hover{box-shadow:0 4px 14px rgba(0,0,0,.12)}
+details.card>summary{cursor:pointer;padding:1rem;font-size:1.2rem;font-weight:700;list-style:none;display:flex;gap:.75rem;align-items:center}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::after{content:"▾";margin-left:auto;color:var(--mut)}
+details.card[open]>summary::after{content:"▴"}
+summary .num{background:var(--acc2);color:#fff;font-family:var(--mono);font-size:.85rem;padding:.2rem .5rem;border-radius:6px}
+[data-theme=dark] summary .num{color:#042f2e}
+.body{padding:0 1rem 1rem;border-top:1px solid var(--bd)}
+.sec{margin-top:1.25rem}
+.sec h3{margin:0 0 .5rem;font-size:1.05rem;color:var(--acc2)}
+.sec p{margin:.5rem 0}
+.sec ul{margin:.5rem 0;padding-left:1.25rem}
+.sec li{margin:.4rem 0}
+.terms{list-style:none;padding:0!important}
+.terms li{margin:.6rem 0}
+.chip{display:inline-block;font-family:var(--mono);font-size:.85rem;background:var(--codebg);color:var(--acc);border:1px solid var(--bd);border-radius:6px;padding:.1rem .5rem;margin-right:.35rem}
+pre{margin:.5rem 0;padding:1rem;background:var(--codebg);border:1px solid var(--bd);border-radius:6px;overflow-x:auto;font-family:var(--mono);font-size:.85rem;line-height:1.45;tab-size:4}
+pre code{font-family:inherit}
+.k-com{color:var(--c-com);font-style:italic}.k-kw{color:var(--c-kw);font-weight:600}.k-str{color:var(--c-str)}.k-pre{color:var(--c-pre)}
+.mind{font-family:var(--mono);font-size:.85rem;white-space:pre}
+.url{font-family:var(--mono);font-size:.85rem;word-break:break-all;color:var(--mut)}
+footer{max-width:1100px;margin:0 auto;padding:1rem;color:var(--mut);font-size:.85rem;border-top:1px solid var(--bd)}
+@media(max-width:480px){header{padding-top:3.5rem}.body{padding:0 .75rem .75rem}}
+@media print{
+ nav#toc,#theme-toggle{display:none!important}
+ body{background:#fff;color:#000}
+ .layout{display:block}
+ details.card{break-inside:auto;box-shadow:none!important;border-color:#999}
+ details.card>summary::after{content:""}
+ pre{white-space:pre-wrap;overflow:visible}
+ .callout{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<header>
+ <button id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+ <h1>CS-301: Operating Systems</h1>
+ <p class="sub">Module 1 — OS Structure &amp; Design (Weeks 1–2)</p>
+ <p class="tag">“Hook → Breakdown → Terms”</p>
+</header>
+
+<div class="wrap">
+<aside class="callout" role="note" aria-label="Module 1 thesis">
+ <h2>Module 1 Thesis: The Architecture Matrix</h2>
+ <p>Before we can look at individual managers, we must understand what the corporate building looks like. The boundary between raw silicon hardware and the software applications determines whether process managers, threads, and schedulers execute within a privileged shared context or isolated address spaces.</p>
+</aside>
+
+<section class="modmeta" aria-label="Module overview">
+ <h2>Module 1: OS Structure &amp; Design (Weeks 1–2)</h2>
+ <p><strong>Module Asset Managed:</strong> The boundary layer between raw silicon hardware and user application software.</p>
+ <p><strong>The Core Problem:</strong> How do we give programs access to powerful hardware without letting them accidentally or maliciously destroy the system?</p>
+</section>
+
+<div class="layout">
+<nav id="toc" aria-label="Table of contents">
+ <p class="toc-title">Module 1 Contents</p>
+ <ul>
+  <li><a href="#lecture-00">L00 Introduction</a></li>
+  <li><a href="#lecture-01">L01 Architecture Matrix</a></li>
+  <li><a href="#lecture-02">L02 Dual-Mode Barrier</a></li>
+  <li><a href="#lecture-03">L03 Gatekeeper</a></li>
+  <li><a href="#lecture-04">L04 Boot Process</a></li>
+  <li><a href="#lab-01">Lab 01 strace</a></li>
+ </ul>
+</nav>
+
+<main>
+
+<!-- ============ LECTURE 00 ============ -->
+<details class="card" id="lecture-00" open>
+<summary><span class="num">L00</span> Lecture 00: Course Introduction</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>State in one clear sentence why an operating system exists, and name the core hardware resources it arbitrates.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>Basic familiarity with running computer programs and typing basic keyboard commands.</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Air Traffic Control Tower.</strong> Imagine a busy international airport with fifty different pilots (User Programs) all trying to land their planes on a single concrete runway (The CPU) at the exact same microsecond. If every pilot acts selfishly, they will crash into each other. The Operating System is the air traffic controller sitting in the tower—it doesn't fly the planes, but it acts as an absolute referee, telling each pilot exactly when they are allowed to use the runway so nobody collides.</p></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>A Multi-Tenant Cloud Virtualization Hypervisor.</strong> An OS functions exactly like an unyielding infrastructure supervisor that isolates resource quotas so that an unhandled stack overflow in Tenant A cannot block or corrupt the physical hardware memory registers of Tenant B.</p></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul><li><strong>Feeds Into: All Future Modules</strong> — Establishes the foundational definition of a "Resource," which directly unlocks Module 2 (CPU Cycles), Module 3 (RAM), and Module 5 (Disk Blocks).</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p>An operating system is primarily a resource manager and a hardware abstraction layer. It exists because physical hardware components (CPU cores, RAM chips, storage blocks) are scarce, while software applications are fundamentally selfish and written as if they own the entire machine.</p>
+<p>The history of OS design tracks a sequential path to eliminate resource waste: Batch Processing (fixing idle CPU time) → Multiprogramming (fixing idle I/O time) → Time-Sharing (fixing idle human wait time) → Modern Personal/Cloud Systems.</p></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">Kernel</code>The core program of the operating system that runs with complete architectural privileges and remains resident in physical memory at all times.</li>
+<li><code class="chip">Resource Manager</code>The internal role of the OS dedicated to allocating hardware fairly and efficiently among competing tasks.</li>
+<li><code class="chip">Abstraction</code>Hiding complex, low-level hardware implementation details behind clean, universal software interfaces (e.g., presenting a raw disk sector array as a simple "File").</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3>
+<p><strong>1960s Batch Mainframe Job Queue:</strong> A user writes code onto physical cardboard punch cards, hands them to a human operator, and waits hours for the CPU to process that single task in complete isolation.</p>
+<p><strong>Modern Linux Ecosystem:</strong> The kernel utilizes time-slicing to rotate thousands of independent instruction streams across CPU threads so rapidly that a human observer perceives them as executing simultaneously.</p></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Live htop Inspection.</strong> Open up a live terminal in class running the top or htop system monitor utility. Point out to the students that even though the laptop only has 4 or 8 physical CPU cores, there are currently over 300 active processes running. Ask the class: "How many of these processes honestly believe they own 100% of the processor right now?" (Answer: All of them).</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 00">CS 301: Operating Systems
+  └── Module 1: OS Structure &amp; Design
+        └── L00: Course Introduction
+              └── The OS as a Resource Referee</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LECTURE 01 ============ -->
+<details class="card" id="lecture-01">
+<summary><span class="num">L01</span> Lecture 01: The Architecture Matrix (Full Five-Paradigm Edition)</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Contrast monolithic kernel performance with microkernel isolation, hybrid performance-isolation balances, layered structural tiers, and modular dynamic extensibility under real-world driver failure scenarios.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>Basic knowledge of computer architecture, registers, C memory spaces, and the concept of CPU privilege rings.</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Corporate Office Floorplan Showdown</strong></p><ul>
+<li><strong>Monolithic Kernel:</strong> A massive open-floor office where every manager, developer, and accountant sits side-by-side with no walls. Workers can directly whisper to anyone else instantly, making communication lightning-fast; however, if one worker catches a highly contagious virus, everyone gets sick and the entire office shuts down immediately (total system crash).</li>
+<li><strong>Microkernel:</strong> A secure building with individual, keycard-locked departments where every service operates inside its own isolated room behind thick concrete walls. If a worker in the accounting room gets sick, that department locks down safely without bringing down the rest of the company, but moving paperwork across departments requires passing through explicit, slow security checkpoints every time (IPC messaging performance tax).</li>
+<li><strong>Layered Architecture:</strong> A strict multi-story skyscraper where departments are stacked on top of each other by rank. Workers on Floor 3 are legally blocked from talking to Floor 1 directly; they can only pass physical folders down to Floor 2, which then processes them and drops them down to Floor 1. It is orderly, but if Floor 2 freezes, the entire chain breaks.</li>
+<li><strong>Modular Kernel:</strong> The open floorplan office, but the outer edge of the room is lined with standardized expansion slots. If you need foreign tax specialists (a new device driver), you don't rebuild the facility—you simply wheel in a pre-built desk module and plug it straight into the main room live without stopping the office workflow. It retains lightning speed, but that new desk is exposed to the open room's virus risks.</li>
+<li><strong>Hybrid Kernel:</strong> The modern corporate compromise. The core management team, the schedulers, and the memory managers sit together in a fast, open-floor center room so they can share files instantly without paperwork delays. However, they build detached outbuildings across the courtyard for dangerous or untrusted personnel—like third-party graphic designers or printer technicians. If a technician catches a virus in their isolated outbuilding, they crash alone, while the executive center room stays alive and running at maximum speed.</li></ul></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>Software Architecture Layout Frameworks</strong></p><ul>
+<li><strong>Monolithic:</strong> A massive single statically linked compiled C binary where every internal function can directly access global memory pointers with zero boundaries.</li>
+<li><strong>Microkernel:</strong> A local network of microservices running on a machine, communicating strictly via isolated socket messages over network loops.</li>
+<li><strong>Layered:</strong> A rigid vertical software stack utilizing strict API boundaries where layer N can only invoke functions belonging to layer N-1.</li>
+<li><strong>Modular:</strong> A monolithic core binary that provides an internal runtime symbol table and loading gateway, allowing object files (.ko modules) to link themselves directly into Ring 0 kernel space at runtime.</li>
+<li><strong>Hybrid:</strong> A monolithic core framework that deliberately encapsulates its file systems and network stacks inside its supervisor memory space for speed, but runs graphical rendering engines and user drivers inside isolated user-space subsystem microservices.</li></ul></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>Feeds Into: Module 2 (Process Management)</strong> — Decides whether process managers, threads, and schedulers execute within a privileged shared context or isolated address spaces.</li>
+<li><strong>Feeds Into: Module 6 (I/O Device Management)</strong> — Determines if hardware drivers run natively inside kernel space with complete access or as unprivileged user-space servers.</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3><ul>
+<li><strong>Monolithic Kernels</strong> pack all core operating system subsystems (virtual memory manager, scheduler, virtual file system, and device drivers) into a single address space running with maximum privilege levels.</li>
+<li><strong>Microkernels</strong> strip the core privilege down to its bare essentials: address space management, thread scheduling, and Inter-Process Communication (IPC). All other classic components (file systems, networking stacks, device drivers) are relegated to user space as modular servers.</li>
+<li><strong>Layered Kernels</strong> split the operating system into an ordered stack of isolated operational layers (0 to N), where each layer is built strictly on top of the lower layer's hardware abstraction primitives.</li>
+<li><strong>Modular Kernels</strong> implement a dynamic monolithic architecture where the core kernel remains lightweight, but allows loadable modules (like network drivers or file system layers) to be dynamically added or removed from Ring 0 memory on-the-fly without rebooting the hardware.</li>
+<li><strong>Hybrid Kernels</strong> combine elements of monolithic efficiency and microkernel safety, running critical speed-sensitive tasks inside supervisor space while pushing volatile multimedia interfaces and software diagnostics outside into user spaces.</li></ul></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">Monolithic Kernel</code>A design architecture where all operating system services execute together in the supervisor address space.</li>
+<li><code class="chip">Microkernel</code>A minimalist design architecture that runs only basic primitives in supervisor space and handles extra services via user-space processes.</li>
+<li><code class="chip">Hybrid Kernel</code>An architecture that runs core services inside a monolithic address space for performance, but isolates non-essential services inside user-space containers for safety.</li>
+<li><code class="chip">Layered Architecture</code>A hierarchical design where system services are separated into distinct vertical tiers, only communicating with immediately adjacent layers.</li>
+<li><code class="chip">Loadable Kernel Module (LKM)</code>An object code file that can be dynamically linked into the running kernel's Ring 0 memory space at runtime without rebuilding the core OS image.</li>
+<li><code class="chip">Supervisor Mode (Ring 0)</code>The execution state that unlocks uninhibited access to all hardware instructions and system memory registers.</li>
+<li><code class="chip">IPC Overhead (Messaging Tax)</code>The performance tax paid in CPU cycles when passing memory packets back and forth between isolated user-space processes across the privilege boundary.</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><pre tabindex="0" class="code" aria-label="C code: five kernel architectures reading a block"><code>// =================================================================
+// ARCHITECTURAL CONCEPTUALIZATION MATRIX
+// =================================================================
+
+// 1. Monolithic / Modular (Dynamic LKM): Direct fast function jump
+void read_block_monolithic(int sector_id, void* buffer) {
+    // Direct, fast calling of file system code inside Ring 0 supervisor space
+    vfs_raw_read(sector_id, buffer);
+}
+
+// 2. Microkernel: IPC message passing boundary tax
+void read_block_microkernel(int sector_id, void* buffer) {
+    Message msg;
+    msg.type = FILE_READ_REQUEST;
+    msg.payload.sector = sector_id;
+    // Forces a message transmission over IPC to an isolated user-space file server
+    ipc_send(FILE_SERVER_PID, &amp;msg);
+    ipc_receive(FILE_SERVER_PID, buffer);
+}
+
+// 3. Layered Model: Strict down-stack structural tier invocation
+void read_block_layered(int sector_id, void* buffer) {
+    // Layer 3 (File Abstraction) calls Layer 2 (Logical Block Mapping)
+    Layer2_ProcessBlockRequest(sector_id, buffer);
+}
+
+// 4. Hybrid Architecture: Combined fast-core with isolated outbuilding routing
+void read_block_hybrid(int sector_id, void* buffer) {
+    if (is_critical_core_request()) {
+        // Runs inside the fast monolithic core block
+        vfs_raw_read(sector_id, buffer);
+    } else {
+        // Dispatches to a sandboxed user-space virtualization layer
+        Message msg;
+        ipc_send(USER_STORAGE_SERVER_PID, &amp;msg);
+    }
+}</code></pre></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Live Kernel Architecture Crash Showdown.</strong> Bring up a Linux terminal and execute a multi-phase system behavior demonstration:</p><ul>
+<li><strong>Phase A (The Monolithic/Modular Risk):</strong> Load a custom Loadable Kernel Module (LKM) designed to deliberately write to an illegal memory address pointer. Showcase how this instantly triggers a total system lockup or Kernel Panic, proving that any faulty driver module sitting inside Ring 0 can crash a monolithic system.</li>
+<li><strong>Phase B (The Microkernel/Hybrid Contrast):</strong> Artificially kill an isolated, unprivileged background user-space system device daemon process. Point out how the desktop graphic window interface layout remains 100% stable, responsive, and functional, proving that microkernel isolation and hybrid design strategies protect system uptime from software failures.</li></ul></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 01">CS 301: Operating Systems
+  └── Module 1: OS Structure &amp; Design
+        └── L01: The Architecture Matrix
+              ├── Monolithic (Linux, FreeBSD)
+              ├── Microkernel (Mach, seL4)
+              ├── Hybrid (Windows NT, macOS)
+              ├── Layered (THE Multiprogramming System)
+              └── Modular (Linux LKMs, NetBSD LKMs)</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LECTURE 02 ============ -->
+<details class="card" id="lecture-02">
+<summary><span class="num">L02</span> Lecture 02: The Dual-Mode Barrier (User Space vs. Kernel Space)</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Explain how the CPU hardware enforces isolation using privilege states, and analyze how monolithic, microkernel, hybrid, layered, and modular architectures distribute their software components across this boundary line.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>Basic understanding of Lecture 01 architectures, the concept of a CPU instruction set, and pointers in memory.</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Secured Corporate Campus Layout</strong></p><ul>
+<li><strong>Monolithic Barrier:</strong> A high-speed corporate headquarters where the CEO, the tech team, and the cleaning staff all work in one single massive open room. Anyone can touch any filing cabinet instantly (maximum efficiency), but if an entry-level worker makes a mistake, the entire company state can be corrupted.</li>
+<li><strong>Microkernel Barrier:</strong> A campus split by a massive concrete security wall. Only a skeleton management crew sits inside the secure Ring 0 building. The file cabinets, network desks, and printer rooms are kicked out across the courtyard into regular, unprivileged Ring 3 office pods. They have to pass messages through a secure, slow pneumatic tube system to coordinate.</li>
+<li><strong>Layered Barrier:</strong> A multi-story office tower with strict security clearance badges. Floor 3 workers can only talk to Floor 2. Floor 2 processes the request and passes it down to Floor 1. If any single floor locks its doors, the entire chain of command freezes.</li>
+<li><strong>Modular Barrier:</strong> The fast open-office headquarters, but featuring secure hot-swappable desk docks. External contractors can plug their specialized equipment directly into the main office floor's power grid while the company is running. Communication remains instant, but a mistake by a contractor can still take down the entire corporate office.</li>
+<li><strong>Hybrid Barrier:</strong> The modern compromise campus. The core executives, memory planners, and high-speed storage teams work inside the fast Ring 0 center room. However, they force the risky multimedia team and external printer drivers to work outside in detached Ring 3 courtyard offices, ensuring their crashes are isolated.</li></ul></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>CPU Execution Modes &amp; Hardware Sandboxing</strong></p><ul>
+<li><strong>User Space (Ring 3):</strong> A hardware-enforced sandbox state where the CPU sets its internal status bits to restrict execution. If an app tries to run an instruction that directly modifies hardware registers or touches protected memory segments, the hardware halts it instantly.</li>
+<li><strong>Kernel Space (Ring 0):</strong> The unrestricted supervisor state where the CPU allows the executing code to fire any assembly instruction, read or write to any physical memory wire, and control hardware clocks directly.</li></ul></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>Feeds Into: Module 2 (Process Management)</strong> — Explains why a context switch between user processes requires saving a restricted CPU state, and how the scheduler itself transitions between Ring 3 and Ring 0 execution modes.</li>
+<li><strong>Feeds Into: Module 4 (Memory Management)</strong> — Establishes the foundational page-table protection bits that mark specific RAM blocks as "Kernel Only" to prevent unauthorized user-space inspection.</li>
+<li><strong>Relies On: CPU Hardware Design</strong> — Utilizes physical mode registers embedded natively inside modern x86_64 chips.</li>
+<li><strong>Feeds Into: Module 3 (Memory Management)</strong> — Base-and-bound sandboxing and virtual page tables completely depend on the dual-mode bit to prevent user apps from editing their own memory access flags.</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p><strong>The Hardware Enforcer:</strong> The dual-mode mechanism is built into the physical silicon of the CPU (such as the Current Privilege Level (CPL) bits in an x86 processor). It is not a software simulation; the chip itself evaluates every instruction against its current privilege ring.</p>
+<p>The CPU relies on a hardware status bit to track its current privilege state. In an x86_64 architecture, this boundary is mapped using Privilege Rings, specifically ranging from Ring 0 (Supervisor/Kernel Mode) down to Ring 3 (User Mode).</p>
+<p>When the processor handles code in Ring 3, executing a privileged instruction (such as rewriting the page table pointer register cr3 or disabling system interrupts) causes the hardware to throw a trap exception, ending the program before it can do harm.</p><ul>
+<li><strong>Monolithic Distribution:</strong> Places the virtual memory manager, scheduler, file system, network stack, and all device drivers together inside the highly privileged Ring 0 zone.</li>
+<li><strong>Microkernel Distribution:</strong> Strips Ring 0 down to the absolute bare minimum (IPC, basic thread scheduling, and low-level memory mapping), moving the file system, network stack, and drivers up into Ring 3 as unprivileged user-space servers.</li>
+<li><strong>Layered Distribution:</strong> Stacks components in absolute hierarchy. Hardware sits at Layer 0 (deepest Ring 0 privilege), while components ascend through distinct software layers until reaching user applications at the top tier (Ring 3).</li>
+<li><strong>Modular Distribution:</strong> Maintains a monolithic core in Ring 0 but provides a dynamic execution gateway, allowing compiled driver binaries (.ko files) to link directly into the privileged Ring 0 address space at runtime on demand.</li>
+<li><strong>Hybrid Distribution:</strong> Keeps performance-critical components (like the virtual memory manager and filesystem) inside Ring 0 for speed, but actively pushes non-critical services (like user-interface rendering engines) into the Ring 3 sandbox.</li></ul></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">Current Privilege Level (CPL)</code>The actual hardware bits inside the CPU register that track whether the system is executing in Ring 0 or Ring 3.</li>
+<li><code class="chip">User Space (Ring 3)</code>The restricted execution territory assigned to normal software applications to prevent direct physical device manipulation.</li>
+<li><code class="chip">Kernel Space (Ring 0)</code>The unrestricted supervisor memory territory where the core operating system software holds absolute hardware authority.</li>
+<li><code class="chip">Privileged Instruction</code>An assembly instruction (like cli to clear interrupts or hlt to halt the processor) that can only be executed when the CPU is running in Ring 0.</li>
+<li><code class="chip">Hardware Exception</code>The immediate electronic trap fired by the CPU when an application in Ring 3 attempts to execute a privileged instruction, forcing a context switch to the kernel handler.</li>
+<li><code class="chip">User Mode (Ring 3)</code>A restrictive CPU execution layer where software applications run with unprivileged access.</li>
+<li><code class="chip">Kernel Mode (Ring 0)</code>The master privilege state allowing complete control over physical components.</li>
+<li><code class="chip">Mode Bit</code>A physical flag register in the CPU tracking current execution privileges.</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><pre tabindex="0" class="code" aria-label="C code: dual-mode hardware enforcement simulation"><code>// =================================================================
+// DUAL-MODE HARDWARE ENFORCEMENT SIMULATION
+// =================================================================
+
+// Running inside Google Chrome or Spotify (User Space / Ring 3)
+void user_application_code() {
+    int x = 5;
+    int y = 10;
+    int sum = x + y; // Completely Legal: Standard math execution inside Ring 3
+
+    // ILLEGAL DIRECT HARDWARE MANIPULATION ATTEMPT:
+    // Attempting to turn off the computer's CPU interrupt line directly via inline assembly
+    __asm__("cli");
+
+    // What happens next?
+    // 1. The CPU hardware checks the CPL bits and sees it is in Ring 3 (User Mode).
+    // 2. The chip refuses to execute the 'cli' instruction.
+    // 3. The hardware instantly stops the app and fires a General Protection Fault trap!
+    // 4. The OS Kernel catches the trap, terminates the app, and displays a crash report.
+}
+
+// Running inside the Core Kernel referee (Kernel Space / Ring 0)
+void kernel_referee_code() {
+    // perfectly legal execution inside Ring 0 supervisor space
+    // The OS safely disables hardware interrupts to perform a critical context switch
+    __asm__("cli");
+
+    // Perform memory and task re-allocation securely...
+    __asm__("sti"); // Re-enable hardware interrupts safely
+}</code></pre></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Privilege Boundary Violation Lab.</strong> Open a terminal window and showcase a live boundary violation demonstration inside Microsoft VS Code. Write a tiny, deliberately broken C program that attempts to dereference a null pointer or touch a protected memory page belonging to the kernel. Run the compilation and execute it live. Have the students watch the terminal print out a clean Segmentation Fault (SIGSEGV) error. Trace out exactly how the CPU chip caught the software step, locked down the boundary, dropped execution control into the Kernel Mode referee, and safely terminated that single isolated application while Discord and Spotify kept running in the background without a single hiccup.</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 02">CS 301: Operating Systems
+  └── Module 1: OS Structure &amp; Design
+        └── L02: The Dual-Mode Barrier
+              ├── User Space (Ring 3 Sandboxed Apps: Chrome, Spotify, VS Code, Discord)
+              └── Kernel Space (Ring 0 Privileged Subsystems: Scheduler, MMU, Drivers)</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LECTURE 03 ============ -->
+<details class="card" id="lecture-03">
+<summary><span class="num">L03</span> Lecture 03: The Gatekeeper Mechanism</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Trace a system call pathway from its user-space declaration down through hardware trap handling and kernel interrupt vector lookup.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>L01, L02, assembly level registers (rax, rdi).</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Bank Teller Counter.</strong> Imagine you want to withdraw money from your savings account at a bank. Because of security protocols, you cannot simply walk past the security guards and open the steel vault yourself. Instead, you must approach a secure bulletproof teller window (The System Call Interface). You write down your specific request on an explicit deposit/withdrawal form (The Syscall Register Number) and hand it through a slot. The teller (Kernel Vector Handler) reads your slip, verifies your ID, opens the vault safely on your behalf, and passes back your cash.</p></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>Software API Routing via Hash Map Function Lookups.</strong> A system call behaves identically to a secure hash map router. The index key is a positive numeric ID (e.g., Syscall #1 for write). The value paired with that key is a strict pointer to a verified, compiled inner kernel function array location.</p></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>Relies On: L02 (Dual-Mode Barrier)</strong> — Relies on hardware interrupt handling paths to shift the CPU from Ring 3 to Ring 0 securely.</li>
+<li><strong>Feeds Into: All Future Modules</strong> — Forms the structural pathway used to open files (sys_open), spin up child processes (sys_fork), and request memory buffers (sys_brk).</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p>Software applications cannot access storage or hardware drivers directly. When a program requests a system action, it places argument inputs into explicit data registers (rdi, rsi, rdx) along with a unique identifier number into the rax register.</p>
+<p>It then invokes a specific assembly trap instruction (syscall or int 0x80). This instruction changes the CPU mode bit to Ring 0, pauses execution, and redirects control straight to the Kernel Interrupt Vector Table, lookup array, and target supervisor handler.</p></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">System Call (Syscall)</code>The programmatic interface used by applications to request core kernel services.</li>
+<li><code class="chip">Hardware Trap</code>An exceptional condition generated by software that shifts control back to the operating system.</li>
+<li><code class="chip">Interrupt Vector Table (IVT)</code>A memory array holding code pointers to specialized driver and kernel function routines.</li>
+<li><code class="chip">Syscall Register Number</code>The specific integer key loaded into the processor to tell the OS which system service to route to.</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><pre tabindex="0" class="code" aria-label="C code: raw x86_64 write syscall"><code>// Bypassing standard printf library wrapper to invoke a raw x86_64 write syscall
+#include &lt;unistd.h&gt;
+
+void main() {
+    char* msg = "Hello from a raw x86_64 system call!\n";
+
+    __asm__(
+        "movq $1, %%rax; \n"  // Syscall Number 1 is explicitly 'write' on Linux
+        "movq $1, %%rdi; \n"  // Argument 1: File descriptor stdout (1)
+        "movq %0, %%rsi; \n"  // Argument 2: Pointer allocation to char string
+        "movq $37, %%rdx; \n" // Argument 3: Strict length of the message array
+        "syscall; \n"         // Fire hardware trap to shift to Ring 0!
+        :
+        : "r"(msg)
+        : "%rax", "%rdi", "%rsi", "%rdx"
+    );
+}</code></pre></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Human Syscall Dispatcher.</strong> Provide students with cards reading sys_read, sys_write, or sys_exit. Appoint one student as the "User App," another as the "CPU Syscall Router," and a third as the "Kernel Core." Have the User App student yell out a syscall number. Watch the CPU Router track that ID code against a chalkboard matrix table to direct the Kernel Core student to execute the proper task.</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 03">CS 301: Operating Systems
+  └── Module 1: OS Structure &amp; Design
+        └── L03: The Gatekeeper Mechanism
+              └── Traps &amp; Vector Tables (Syscall Dispatcher)</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LECTURE 04 ============ -->
+<details class="card" id="lecture-04">
+<summary><span class="num">L04</span> Lecture 04: The Boot Process</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Chronologically sequence the four structural stages that occur between a user pressing a computer's physical power-on switch and the arrival of a user space login prompt.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>L01, L02, L03, basic understanding of non-volatile flash memory vs volatile RAM.</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Multi-Stage Relay Race.</strong> Imagine a track-and-field relay race where each runner has a completely different athletic build. Runner 1 (UEFI/BIOS) is incredibly small and fast; their only job is to quickly check that the track is clear and pass a baton to Runner 2. Runner 2 (The Bootloader) grabs the baton, sprints out to find the heavyweight champion runner sleeping in the locker room, wakes them up, and hands them the baton. That heavyweight champion is Runner 3 (The Kernel Core), who takes over the track, sets up the entire stadium infrastructure, and finally hands the baton to Runner 4 (User Space/Init System) to open the stadium doors for the spectators (The Users). Each runner drops out completely once their handoff finishes.</p></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>A Multi-Stage Statically-Linked Compiler Toolchain Pipeline.</strong> The boot process is a deterministic sequence of bootstrap execution transitions where each loader routine has just enough hardcoded primitives to read, verify, map, and jump into the entry-point memory address of the next, more complex software layer.</p></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>Relies On: Motherboard Firmware ROM</strong> — Requires hardware-level permanent instructions to initiate execution at a specific fixed memory vector upon power delivery.</li>
+<li><strong>Feeds Into: Module 2 (Process Management)</strong> — Concludes by spinning up Process ID 1 (init or systemd), which serves as the direct genetic ancestor of every process ever created during that uptime cycle.</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p>The CPU cannot natively read a file system upon power-on. It relies on a hardware bootstrap process:</p><ul>
+<li><strong>Stage 1 (UEFI/BIOS):</strong> Code executes from a read-only flash chip on the motherboard to run a Power-On Self-Test (POST) to verify physical RAM and hardware integrity.</li>
+<li><strong>Stage 2 (Bootloader):</strong> UEFI locates a designated boot sector on a storage drive and loads a small program (like GRUB) into RAM. This bootloader's sole job is to locate the compiled kernel binary image on the disk.</li>
+<li><strong>Stage 3 (Kernel Initialization):</strong> The bootloader loads the kernel into memory and jumps to its entry address. The kernel initializes device drivers, constructs virtual memory page tables, and mounts the root file system.</li>
+<li><strong>Stage 4 (Init System):</strong> The kernel launches the very first user-space process (/sbin/init or systemd), which spins up background services and draws the login prompt.</li></ul></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">UEFI (Unified Extensible Firmware Interface)</code>Modern motherboard software that initializes hardware and bootstraps the operating system bootloader.</li>
+<li><code class="chip">Bootloader</code>A lightweight intermediate utility (e.g., GRUB) responsible for loading the core operating system kernel into memory.</li>
+<li><code class="chip">systemd / init</code>The primordial user-space process (PID 1) responsible for spawning and managing all system daemons and shell interfaces.</li>
+<li><code class="chip">POST (Power-On Self-Test)</code>The initial hardware diagnostic routine run by motherboard firmware to verify system readiness.</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><p>A typical Linux system utilizes the GRUB bootloader configuration file (<code class="chip">/boot/grub/grub.cfg</code>) to pinpoint the precise location of the kernel image file (e.g., <code class="chip">/vmlinuz-linux</code>) and an initial RAM disk (<code class="chip">/initramfs-linux.img</code>) containing basic filesystem drivers. When GRUB hands control off to vmlinuz, it passes command-line options that instruct the kernel exactly how to mount the primary drive partition.</p></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Boot Time Synchronization Challenge.</strong> Have every student close their laptops, shut them down completely, and prepare a stopwatch app on their mobile phones. On the count of three, have everyone press their laptop power buttons simultaneously. Instruct them to stop the timer the exact millisecond their graphical login screen or desktop draws. Have students map their elapsed time vectors to analyze where their hardware spent the most time (e.g., UEFI POST vs. Kernel Driver Init).</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 04">CS 301: Operating Systems
+  └── Module 1: OS Structure &amp; Design
+        └── L04: The Boot Process
+              └── Hardware POST → Bootloader → Kernel Init → PID 1 (systemd)</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LAB 01 ============ -->
+<details class="card" id="lab-01">
+<summary><span class="num">LAB</span> Lab 01: Syscall Telemetry via strace</summary>
+<article class="body">
+<section class="sec"><h3>🧪 Lab Assignment Target</h3><p>Lab 1: Syscall Telemetry via strace</p></section>
+<section class="sec"><h3>📝 Task Description</h3><p>Students write a basic C program that reads text lines out of a file. They then use the Linux strace tool to count and track the real system calls under the hood (<code class="chip">openat</code>, <code class="chip">read</code>, <code class="chip">write</code>, <code class="chip">close</code>).</p></section>
+<section class="sec"><h3>⚖️ Grading Weight Validation</h3><p>Evaluated via automated QEMU script test runners (Counts for portion of the 45% Lab block).</p></section>
+</article>
+</details>
+
+</main>
+</div>
+</div>
+
+<footer>CS-301: Operating Systems — Module 1: OS Structure &amp; Design (Weeks 1–2)</footer>
+
+<script>
+(function(){
+ var root=document.documentElement,btn=document.getElementById('theme-toggle');
+ // Dark/light toggle, persisted
+ try{var s=localStorage.getItem('theme');if(s){root.setAttribute('data-theme',s)}else if(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches){root.setAttribute('data-theme','dark')}}catch(e){}
+ btn.addEventListener('click',function(){
+  var n=root.getAttribute('data-theme')==='dark'?'light':'dark';
+  root.setAttribute('data-theme',n);
+  try{localStorage.setItem('theme',n)}catch(e){}
+ });
+ // Collapsible cards: open target card on link click / hash load
+ var cards=[].slice.call(document.querySelectorAll('details.card'));
+ function openHash(){var id=location.hash.slice(1),el=id&&document.getElementById(id);if(el&&el.tagName==='DETAILS'){el.open=true}}
+ window.addEventListener('hashchange',openHash);openHash();
+ // Scroll-spy
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ function setActive(id){links.forEach(function(a){var on=a.getAttribute('href')==='#'+id;a.classList.toggle('active',on);if(on){a.setAttribute('aria-current','true');var nav=document.getElementById('toc');if(nav.scrollWidth>nav.clientWidth&&nav.scrollHeight<=nav.clientHeight+2){nav.scrollLeft=a.offsetLeft-20}}else{a.removeAttribute('aria-current')}})}
+ if('IntersectionObserver' in window){
+  var vis={};
+  var io=new IntersectionObserver(function(es){
+   es.forEach(function(e){vis[e.target.id]=e.isIntersecting});
+   for(var i=0;i<cards.length;i++){if(vis[cards[i].id]){setActive(cards[i].id);return}}
+  },{rootMargin:'-20% 0px -60% 0px'});
+  cards.forEach(function(c){io.observe(c)});
+ }
+ setActive('lecture-00');
+ // Print: expand all cards, restore afterwards
+ var prev=[];
+ window.addEventListener('beforeprint',function(){prev=cards.map(function(c){return c.open});cards.forEach(function(c){c.open=true})});
+ window.addEventListener('afterprint',function(){cards.forEach(function(c,i){c.open=prev[i]})});
+ // Lightweight C syntax colouring (comments, strings, keywords) via CSS classes
+ var kw=/\b(void|int|char|if|else|return|struct|define)\b/g;
+ document.querySelectorAll('pre.code code').forEach(function(code){
+  code.innerHTML=code.innerHTML.split('\n').map(function(line){
+   var m=line.match(/^(.*?)(\/\/.*)$/);
+   var head=m?m[1]:line,tail=m?'<span class="k-com">'+m[2]+'</span>':'';
+   if(/^\s*#include/.test(head)){return '<span class="k-pre">'+head+'</span>'+tail}
+   var parts=head.split(/("(?:[^"\\]|\\.)*")/);
+   head=parts.map(function(p,i){return i%2?'<span class="k-str">'+p+'</span>':p.replace(kw,'<span class="k-kw">$1</span>')}).join('');
+   return head+tail;
+  }).join('\n');
+ });
+})();
+</script>
+</body>
+</html>
