@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="CS-301 Operating Systems — Module 5: File & Storage Management.">
+<title>CS-301: Operating Systems — Module 5</title>
+<style>
+:root{--bg:#fafaf9;--surf:#fff;--acc:#1e40af;--acc2:#0f766e;--tx:#1c1917;--mut:#57534e;--bd:#e7e5e4;--warn:#b45309;--warnbg:#fef3c7;--codebg:#f5f5f4;
+--sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+[data-theme=dark]{--bg:#0c0a09;--surf:#1c1917;--acc:#60a5fa;--acc2:#5eead4;--tx:#fafaf9;--mut:#a8a29e;--bd:#292524;--warn:#fcd34d;--warnbg:#451a03;--codebg:#0c0a09}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:4.5rem}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--sans);font-weight:400;line-height:1.5}
+h1,h2,h3{font-family:var(--sans);line-height:1.25}
+a{color:var(--acc)}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+header{position:relative;padding:2rem 1rem 1rem;max-width:1100px;margin:0 auto}
+header h1{margin:0;font-size:clamp(1.6rem,4vw,2.4rem)}
+header .sub{margin:.25rem 0;font-size:1.15rem;color:var(--acc);font-weight:600}
+header .tag{margin:0;color:var(--mut);font-style:italic}
+#theme-toggle{position:absolute;top:1rem;right:1rem;width:2.5rem;height:2.5rem;border:1px solid var(--bd);border-radius:6px;background:var(--surf);color:var(--tx);font-size:1.2rem;cursor:pointer}
+.wrap{max-width:1100px;margin:0 auto;padding:0 1rem 3rem}
+.callout{background:var(--warnbg);color:var(--warn);border:1px solid var(--warn);border-left:6px solid var(--warn);border-radius:8px;padding:1.25rem;margin:1rem 0 2rem}
+.callout h2{margin:0 0 .5rem;font-size:1.25rem}
+.callout p{margin:0;font-size:1.05rem;font-weight:500}
+.modmeta{background:var(--surf);border:1px solid var(--bd);border-radius:8px;padding:1rem;margin-bottom:2rem}
+.modmeta h2{margin:0 0 .5rem;font-size:1.2rem}
+.modmeta p{margin:.35rem 0}
+.layout{display:block}
+nav#toc{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--bd);margin:0 -1rem 1.5rem;padding:.5rem 1rem;overflow-x:auto}
+nav#toc ul{list-style:none;margin:0;padding:0;display:flex;gap:.5rem;white-space:nowrap}
+nav#toc a{display:block;padding:.35rem .8rem;border:1px solid var(--bd);border-radius:6px;background:var(--surf);color:var(--tx);text-decoration:none;font-size:.9rem}
+nav#toc a.active{background:var(--acc);border-color:var(--acc);color:var(--bg);font-weight:600}
+nav#toc .toc-title{display:none}
+@media(min-width:1025px){
+ .layout{display:grid;grid-template-columns:240px 1fr;gap:2rem;align-items:start}
+ nav#toc{top:1rem;margin:0;padding:1rem;border:1px solid var(--bd);border-radius:8px;background:var(--surf);overflow:visible;max-height:calc(100vh - 2rem);overflow-y:auto}
+ nav#toc .toc-title{display:block;margin:0 0 .5rem;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+ nav#toc ul{flex-direction:column;white-space:normal;gap:.25rem}
+ nav#toc a{border:0;background:transparent;border-left:3px solid transparent;border-radius:0 6px 6px 0}
+ nav#toc a.active{background:transparent;color:var(--acc);border-left-color:var(--acc)}
+}
+details.card{background:var(--surf);border:1px solid var(--bd);border-radius:8px;margin-bottom:2rem;transition:box-shadow .2s}
+details.card:hover{box-shadow:0 4px 14px rgba(0,0,0,.12)}
+details.card>summary{cursor:pointer;padding:1rem;font-size:1.2rem;font-weight:700;list-style:none;display:flex;gap:.75rem;align-items:center}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::after{content:"▾";margin-left:auto;color:var(--mut)}
+details.card[open]>summary::after{content:"▴"}
+summary .num{background:var(--acc2);color:#fff;font-family:var(--mono);font-size:.85rem;padding:.2rem .5rem;border-radius:6px}
+[data-theme=dark] summary .num{color:#042f2e}
+.body{padding:0 1rem 1rem;border-top:1px solid var(--bd)}
+.sec{margin-top:1.25rem}
+.sec h3{margin:0 0 .5rem;font-size:1.05rem;color:var(--acc2)}
+.sec p{margin:.5rem 0}
+.sec ul{margin:.5rem 0;padding-left:1.25rem}
+.sec li{margin:.4rem 0}
+.terms{list-style:none;padding:0!important}
+.terms li{margin:.6rem 0}
+.chip{display:inline-block;font-family:var(--mono);font-size:.85rem;background:var(--codebg);color:var(--acc);border:1px solid var(--bd);border-radius:6px;padding:.1rem .5rem;margin-right:.35rem}
+pre{margin:.5rem 0;padding:1rem;background:var(--codebg);border:1px solid var(--bd);border-radius:6px;overflow-x:auto;font-family:var(--mono);font-size:.85rem;line-height:1.5}
+pre.plain{white-space:pre-wrap;overflow-wrap:anywhere}
+.mind{font-family:var(--mono);font-size:.85rem;white-space:pre}
+.url{font-family:var(--mono);font-size:.85rem;word-break:break-all;color:var(--mut)}
+footer{max-width:1100px;margin:0 auto;padding:1rem;color:var(--mut);font-size:.85rem;border-top:1px solid var(--bd)}
+@media(max-width:480px){header{padding-top:3.5rem}.body{padding:0 .75rem .75rem}}
+@media print{
+ nav#toc,#theme-toggle{display:none!important}
+ body{background:#fff;color:#000}
+ .layout{display:block}
+ details.card{break-inside:auto;box-shadow:none!important;border-color:#999}
+ details.card>summary::after{content:""}
+ pre{white-space:pre-wrap;overflow:visible}
+ .callout{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<header>
+ <button id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+ <h1>CS-301: Operating Systems</h1>
+ <p class="sub">Module 5 — File &amp; Storage Management (Weeks 11–12)</p>
+ <p class="tag">“Hook → Breakdown → Terms”</p>
+</header>
+
+<div class="wrap">
+<aside class="callout" role="note" aria-label="Module 5 thesis">
+ <h2>Module 5 Thesis: Mapping Strings to Blocks</h2>
+ <p>Physical storage devices only understand a flat index of sectors (e.g., "Sector #4096"), while human beings organize information using readable strings (e.g., /home/user/Resume.pdf). How do we map strings to disk blocks efficiently while protecting data from sudden power loss corruption?</p>
+</aside>
+
+<section class="modmeta" aria-label="Module overview">
+ <h2>Module 5: File &amp; Storage Management (Weeks 11–12)</h2>
+ <p><strong>Module Asset Managed:</strong> Hard Disk Drives (HDDs), Solid-State Drives (SSDs), non-volatile persistent storage blocks, and file metadata structures.</p>
+ <p><strong>The Core Problem:</strong> Physical storage devices only understand a flat index of sectors (e.g., "Sector #4096"), while human beings organize information using readable strings (e.g., /home/user/Resume.pdf). How do we map strings to disk blocks efficiently while protecting data from sudden power loss corruption?</p>
+</section>
+
+<div class="layout">
+<nav id="toc" aria-label="Table of contents">
+ <p class="toc-title">Module 5 Contents</p>
+ <ul>
+  <li><a href="#lecture-16">L16 Disk Geometry</a></li>
+  <li><a href="#lecture-17">L17 File Abstraction</a></li>
+  <li><a href="#lecture-18">L18 Inodes</a></li>
+  <li><a href="#lecture-19">L19 Journaling</a></li>
+  <li><a href="#lab-05">Lab 05 RAM Disk FS</a></li>
+ </ul>
+</nav>
+
+<main>
+
+<!-- ============ LECTURE 16 ============ -->
+<details class="card" id="lecture-16" open>
+<summary><span class="num">L16</span> Lecture 16: Disk Geometry &amp; Physical Storage Realities (HDD vs. SSD)</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Calculate total disk read access times factoring in seek time, rotational latency, and transfer rates, and compare architectural wear-leveling traits between mechanical platters and flash memory grids.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>Module 4 (All Lectures), basic physics and metric conversions.</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Record Player Needle vs. The Grid of Light Switches.</strong> Imagine a classic vinyl record player. To play a specific song, you must physically lift the tonearm, move it to the correct track position (Seek Time), and wait for the vinyl record to spin around until the opening note passes right underneath the needle (Rotational Latency). This is a Hard Disk Drive (HDD)—moving parts take real, slow physical time. A Solid-State Drive (SSD) is like a massive grid of millions of light switches on a wall. To read a sector, you don't move anything; you just read the electrical state of a switch instantly. However, flipping a switch too many times wears out the plastic—which is why the building manager must rotate which switches are used over time (Wear Leveling).</p></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>Sequential Tape Drive Scanning vs. Random Access Memory Chip Addressing.</strong> Disk geometry optimization matches low-level audio buffer rendering arrays, sorting whether incoming block seek vectors are processed in raw arrival order or grouped using elevators to minimize sweeping physical arm head fatigue.</p></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>Feeds Into: L17 (File Abstractions &amp; Inodes)</strong> — The extreme performance difference between sequential reads and random sweeps on mechanical drives directly explains why classic Unix file system layouts obsess over contiguous disk block groupings.</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p>Operating systems must bridge the gap between memory performance and permanent storage. HDDs are mechanical devices composed of spinning magnetic platters, read/write heads, and tracks. HDD data retrieval pays a physical performance penalty: Seek Time (moving the arm to the track) and Rotational Latency (waiting for the sector to spin under the head).</p>
+<p>SSDs eliminate moving parts using NAND flash memory cells, rendering seek time obsolete. However, SSDs introduce an asymmetric constraint: they can read/write data at a fine Page level, but can only erase data in massive Blocks. To manage this and prolong flash cell lifespans, the device firmware runs a Flash Translation Layer (FTL) to enforce Wear Leveling.</p></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">Seek Time</code>The physical time required for an HDD's mechanical read/write head arm to sweep and lock onto a target track cylinder.</li>
+<li><code class="chip">Rotational Latency</code>The duration a drive partition waits for a specific sector block to spin under the active magnetic head sensor.</li>
+<li><code class="chip">Wear Leveling</code>An internal SSD optimization algorithm that dynamically remaps logical write address blocks to distribute flash cell erasure stress evenly across the device matrix.</li>
+<li><code class="chip">Flash Translation Layer (FTL)</code>The embedded controller software inside an SSD that translates virtual OS sector read commands into physical cell array electrical voltage updates.</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><pre class="plain" tabindex="0" aria-label="HDD access time worked problem">Mechanical HDD Access Time Math Problem: A spinning hard disk rotates at 7200 RPM, has an average seek time of 4ms, and a transfer rate of 100MB/s. How long does it take to read a single 512-byte sector?
+
+Step 1: Calculate Rotational Latency. 7200 RPM = 120 rotations per second. One full rotation costs 1 / 120 = 8.33ms. On average, the disk must rotate halfway to find a target: Average Latency = 8.33 / 2 = 4.17ms.
+Step 2: Calculate Transfer Time. 512 bytes / 100,000,000 bytes/sec = 0.005ms.
+Step 3: Sum the parameters: Total Time = 4ms (Seek) + 4.17ms (Rotation) + 0.005ms (Transfer) = 8.175ms.
+
+(This proves why random small reads paralyze mechanical drive speeds, as the system spends 99.9% of its time moving metal arms instead of transferring data).</pre></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Defragmentation Visualization Challenge.</strong> Bring up a classic visual hard drive defragmentation software animation video or diagram layout. Show students a highly fragmented file layout where file blocks are scattered across distant cylinders. Have them calculate how many separate seek operations a mechanical disk must pay to stitch that file back into memory, demonstrating why file alignment optimization historically mattered.</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 16">CS 301: Operating Systems
+  └── Module 5: File &amp; Storage Management
+        └── L16: Disk Geometry
+              └── HDD Physics (Seek, Rotate) vs SSD Silicon (FTL Pages, Blocks, Wear Leveling)</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LECTURE 17 ============ -->
+<details class="card" id="lecture-17">
+<summary><span class="num">L17</span> Lecture 17: File Abstraction &amp; Directory Topology</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Trace a full absolute path resolution string block-by-block through a hierarchical directory tree structure to identify path parsing boundaries.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>L16 (Disk Geometry).</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Nested Treasure Boxes.</strong> Imagine a set of wooden boxes nested inside each other. A file path like /home/user/resume.pdf is not a single location; it is a set of instructions. The root directory / is the master chest sitting on the floor. You open the master chest, look inside, and find an index sheet that points you to a smaller box labeled home. You open the home box, scan its internal index list, and find a pointer to a box labeled user. Inside the user box, you find a direct receipt containing the real coordinate map to the file resume.pdf. A directory is not a special type of magic hard drive space—it is just a special file that contains an index ledger of human names matched to physical ID tokens.</p></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>A Linked List Node Map traversing a Graph Directory Tree.</strong> Directory resolution paths match nested object property lookups inside a JSON format dictionary payload, where every sub-property acts as an absolute memory index to route access downstream.</p></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>Relies On: L16 (Disk Geometry)</strong> — Abstracts away physical hardware sector dimensions, presenting a file as a seamless, expandable virtual string array.</li>
+<li><strong>Feeds Into: L18 (Inode Architecture)</strong> — Resolving a directory name returns an inode integer index number, which serves as the direct hardware key for metadata allocation.</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p>The user-space view of storage relies on a File Abstraction. A file is a linear array of bytes that can be created, read, written, and deleted. The kernel manages these collections using a Hierarchical Directory Topology.</p>
+<p>A directory is implemented internally as a structured file layout containing pairs of human-readable text strings and unique numerical block identifiers (Inode Numbers). When a process executes a system call on a path string like /etc/passwd, the kernel parses the string sequentially, using the active index file layer to map names to block nodes until the final target file entry resolves.</p></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">File Descriptor</code>A small, non-negative index integer returned to user space that acts as a secure session key to access a process's open file lookup array.</li>
+<li><code class="chip">Directory</code>A specialized file containing an ordered array ledger linking human-readable text name string keys to unique internal system inode indexes.</li>
+<li><code class="chip">Hard Link</code>A directory entry map pointer that links an additional human file name string directly to an existing, shared historical inode number block.</li>
+<li><code class="chip">Soft Link (Symbolic Link)</code>A standalone file containing a text string layout representing an absolute path to a completely separate file entry destination.</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><pre class="plain" tabindex="0" aria-label="Path resolution walkthrough">Path Resolution Walkthrough Trace: When the terminal commands a task like cat /var/log/sys.log, the VFS kernel layer executes these steps:
+
+Step 1: Read the hardcoded boot sector block to find the root directory Inode (#2 on standard Linux).
+Step 2: Read the block entries for Inode #2. Scan text lines to locate the entry string match "var". Retrieve its paired index pointer: Inode #45.
+Step 3: Open and scan the internal table rows of Inode #45. Find the mapping string "log". Retrieve its index key: Inode #812.
+Step 4: Open Inode #812, locate the row matching "sys.log", and land on target Inode #9042, which holds the final file metrics and pointers.</pre></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Human Path Traversal Relay.</strong> Assign individual students to act as isolated "Directories" (root, home, user, docs). Hand each student a small notebook index card listing names and numbers. Have a student at the front act as an Application caller asking to locate /home/user/docs/lab.c. Watch the students pass the request token sequentially down the path chain, looking up index lines from card to card until the target code location maps.</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 17">CS 301: Operating Systems
+  └── Module 5: File &amp; Storage Management
+        └── L17: File Abstraction
+              └── Path Traversal Trees → Directory Mapping Files → File Descriptor Tables</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LECTURE 18 ============ -->
+<details class="card" id="lecture-18">
+<summary><span class="num">L18</span> Lecture 18: Inode Architecture &amp; File System Layouts</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Calculate maximum file scale size capacities for an inode architecture layout featuring direct, single indirect, and double indirect block pointers.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>L17 (File Abstraction &amp; Directory Topology), bit-to-byte storage math.</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Library Ledger Card vs. The Book Content.</strong> Imagine checking out a book from a library. The book text itself represents the real data blocks. The library index filing card taped inside the front cover is the Inode. The card doesn't contain any story lines; instead, it holds the metadata details: who owns the book (Owner ID), who is allowed to read it (Permissions), the exact character length (File Size), and a list of shelf coordinate numbers telling you exactly where the chapters are stored on the library floor (Block Pointers). If a book grows too long, the card lists a coordinate to another ledger box containing additional lists of shelf coordinates (Indirect Pointers).</p></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>An Index Allocation Array with Indirect Node Chains.</strong> An inode layout operates identically to a multi-tiered array indexing system, where static top-level row keys reference raw data blocks, while overflow indices point to sub-arrays of secondary pointers.</p></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>Relies On: Module 3 (Memory Management)</strong> — Connects to virtual memory systems to implement Memory Mapping (mmap), which maps a file's disk block inode indexes directly into a thread's virtual page frames.</li>
+<li><strong>Feeds Into: L19 (Crash Consistency)</strong> — Any modification to file text or directory sizing metrics requires executing atomic metadata pointer updates across the inode map.</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p>Unix-like systems separate a file's human-readable name from its core metadata. An Inode (Index Node) is a fixed-size kernel data structure dedicated to a single file instance. It stores metadata metrics: File Type, Size, Owner, Access Permissions, Timestamps, and a critical index tracking array called Block Pointers.</p>
+<p>To keep the inode size small while supporting massive files, the layout utilizes an asymmetric branching index tree structure. It provides a row of Direct Pointers that map straight to data sectors, a Single Indirect Pointer (pointing to a disk block filled with pointers to data), and a Double Indirect Pointer (pointing to a block of pointers to blocks of pointers) to handle large file sizes.</p></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">Inode</code>The foundational data structure in Unix file systems tracking a single file's complete metadata metrics and physical disk block locations.</li>
+<li><code class="chip">Direct Pointer</code>An internal inode array address slot that points directly to a real physical block holding file data bytes.</li>
+<li><code class="chip">Indirect Pointer</code>An array slot inside an inode that points to a sector block allocated exclusively to hold additional address tracking pointers.</li>
+<li><code class="chip">Metadata</code>Structural descriptive data about a file (permissions, sizing, timestamps) rather than the literal file contents.</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><pre class="plain" tabindex="0" aria-label="Inode capacity calculation">Inode Storage Capacity Calculation Problem: Assume an inode layout has 12 Direct Pointers, 1 Single Indirect Pointer, and 1 Double Indirect Pointer. The system block size is 4KB (4096 bytes), and every disk pointer address costs 4 bytes of storage space. What is the maximum file size this architecture can hold?
+
+Step 1: Calculate Direct Block capacity. 12 blocks * 4KB = 48KB.
+Step 2: Calculate Single Indirect capacity. One 4KB block can hold 4096 / 4 = 1024 pointer addresses. 1024 pointers * 4KB blocksize = 4MB.
+Step 3: Calculate Double Indirect capacity. Direct address count branches exponentially: 1024 × 1024 = 1,048,576 pointers. 1,048,576 * 4KB blocksize = 4GB.
+Step 4: Sum the branches: Maximum Size Limit = 48KB + 4MB + 4GB = 4.004GB.</pre></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Live Inode Inspection Hunt.</strong> Open up a live Linux terminal environment via projector. Instruct students to run the system command <code class="chip">ls -i</code> or <code class="chip">stat resume.pdf</code>. Point out the integer index value displayed at the start of the print line. Show the class how creating hard links duplicate this exact same numeric key across different directory trees, proving that multiple names can mask a single physical inode core.</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 18">CS 301: Operating Systems
+  └── Module 5: File &amp; Storage Management
+        └── L18: Inode Architecture
+              └── Metadata Blocks → Direct/Indirect Trees Allocation Math → System Capacities</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LECTURE 19 ============ -->
+<details class="card" id="lecture-19">
+<summary><span class="num">L19</span> Lecture 19: Crash Consistency &amp; The Journaling Engine</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Sequence the logical operational lifecycle transitions of a Write-Ahead Logging write pipeline to recover a file system safely after mid-write power loss.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>Module 4 (Process Synchronization), L18 (Inode Architecture).</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>Writing a Financial Check in Pencil First.</strong> Imagine you want to transfer $1,000 to a business partner. If you start making the change across different account books and the room suddenly catches fire midway through, your records get half-updated and ruined. To prevent this, you keep a tiny notebook chained to your desk—the Journal. Before you modify any main bank ledgers, you write a clear note in the journal: "I intend to add $1,000 to Book B and subtract $1,000 from Book A" (Write-Ahead Logging). Once that intent note is written in ink, you can update the main books. If the building loses power midway through the main write, recovery is trivial: you check the journal notebook, read exactly what your intent was, and replay the work smoothly until everything balances.</p></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>An Atomic Database Commit Transaction Log.</strong> Journaling operates identically to a non-volatile undo-redo database transaction pipeline, wrapping nested write modifications inside a strict validation framework that rolls back partial commits.</p></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>Relies On: Module 4 (Process Synchronization)</strong> — Requires strict mutual exclusion lock gates to ensure concurrent write threads do not interleave journal updates corruptly.</li>
+<li><strong>Feeds Into: Module 6 (I/O Device Management)</strong> — Requires issuing explicit flush command signals to device driver queues to guarantee that journal blocks settle onto disk chips before main metadata writes fire.</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p>A file system update often requires modifying multiple separate disk blocks simultaneously (e.g., allocating a data block, updating the data bitmap, and modifying the parent inode pointer). If a sudden power loss occurs midway through this sequence, the file system is left in an inconsistent state, leading to orphaned blocks or corrupted file system metadata.</p>
+<p>Modern file systems (like Linux ext4) resolve this using Journaling (Write-Ahead Logging). Before any modifications hit the main disk structures, the file system writes the intent parameters into a designated, isolated ring-buffer zone on disk called the Journal. Once the journal write is committed safely, the system asynchronously writes the changes to the main file system structures (Checkpointing).</p></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">Crash Consistency</code>The ability of a file system to recover structural data integrity safely and coherently after an ungraceful system crash or power loss event.</li>
+<li><code class="chip">Journaling (Write-Ahead Log)</code>A reliability mechanism that logs all structural changes into an isolated scratch space on disk before executing updates on main file structures.</li>
+<li><code class="chip">Checkpointing</code>The file system cycle step that safely copies verified, journaled file modifications out of the log buffer and writes them down onto the primary disk layout.</li>
+<li><code class="chip">Metadata Journaling</code>A performance optimization mode that logs only structural layout mutations (inodes, bitmaps) into the journal log, allowing raw file content bytes to stream directly to data blocks.</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><pre class="plain" tabindex="0" aria-label="Mid-write failure recovery scenario">The Mid-Write Failure Recovery Analysis Scenario: A user is appending text data to a file. This action requires writing to three separate disk sectors: Inode [I], Data Bitmap [B], and Data Block [D].
+
+Without Journaling: Power fails after writing [B] and [D], but before [I] is updated. The disk bitmap marks the block as filled, but no inode owns it, creating an unrecoverable memory leak loop error.
+
+With Journaling: The system writes the intent block [Journal Start: update I, B, D] down to the log sector. If power crashes before the log commit completes, the system discards the partial log entry upon reboot. If power crashes after the log commit completes but during main checkpointing, the reboot recovery routine scans the journal, finds a complete transaction, and replays it to restore file system consistency.</pre></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Power-Loss Crash Recovery Simulation Game.</strong> Draw the Journal track and Main Disk Blocks on the chalkboard. Have a student act as a file system driver trying to write an update. Shout out "POWER FAILURE!" at random chronological intervals (e.g., during log write, right after log commit, or mid-way through checkpointing). Have the class step forward as the reboot recovery scanner, read the current status of the board blocks, and determine whether to discard the change or force a replay commit to fix the system.</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 19">CS 301: Operating Systems
+  └── Module 5: File &amp; Storage Management
+        └── L19: Crash Consistency
+              └── Consistent States → Metadata Corruption Loops → Journal Commit Log Channels → Checkpoint Writes</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LAB 05 ============ -->
+<details class="card" id="lab-05">
+<summary><span class="num">LAB</span> Lab 05: Minimal Inode-Based RAM Disk File System Layout</summary>
+<article class="body">
+<section class="sec"><h3>🧪 Lab Assignment Target</h3><p>Lab 5: Minimal Inode-Based RAM Disk File System Layout</p></section>
+<section class="sec"><h3>📝 Task Description</h3><p>Students allocate a raw contiguous byte buffer array inside memory to mimic a 1MB virtual storage drive. They write C data structures defining a small Inode map, a Data Block allocation bitmap, and a root directory array layout. Students code low-level custom implementations of file creation, folder directory insertion parsing, and file data write utilities.</p></section>
+<section class="sec"><h3>⚖️ Grading Weight Validation</h3><p>Automated unit validation configurations mount the student files, create deep directory paths, and audit block allocation.</p></section>
+</article>
+</details>
+
+</main>
+</div>
+</div>
+
+<footer>CS-301: Operating Systems — Module 5: File &amp; Storage Management (Weeks 11–12)</footer>
+
+<script>
+(function(){
+ var root=document.documentElement,btn=document.getElementById('theme-toggle');
+ // Dark/light toggle, persisted
+ try{var s=localStorage.getItem('theme');if(s){root.setAttribute('data-theme',s)}else if(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches){root.setAttribute('data-theme','dark')}}catch(e){}
+ btn.addEventListener('click',function(){
+  var n=root.getAttribute('data-theme')==='dark'?'light':'dark';
+  root.setAttribute('data-theme',n);
+  try{localStorage.setItem('theme',n)}catch(e){}
+ });
+ // Collapsible cards: open target card on link click / hash load
+ var cards=[].slice.call(document.querySelectorAll('details.card'));
+ function openHash(){var id=location.hash.slice(1),el=id&&document.getElementById(id);if(el&&el.tagName==='DETAILS'){el.open=true}}
+ window.addEventListener('hashchange',openHash);openHash();
+ // Scroll-spy
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ function setActive(id){links.forEach(function(a){var on=a.getAttribute('href')==='#'+id;a.classList.toggle('active',on);if(on){a.setAttribute('aria-current','true');var nav=document.getElementById('toc');if(nav.scrollWidth>nav.clientWidth&&nav.scrollHeight<=nav.clientHeight+2){nav.scrollLeft=a.offsetLeft-20}}else{a.removeAttribute('aria-current')}})}
+ if('IntersectionObserver' in window){
+  var vis={};
+  var io=new IntersectionObserver(function(es){
+   es.forEach(function(e){vis[e.target.id]=e.isIntersecting});
+   for(var i=0;i<cards.length;i++){if(vis[cards[i].id]){setActive(cards[i].id);return}}
+  },{rootMargin:'-20% 0px -60% 0px'});
+  cards.forEach(function(c){io.observe(c)});
+ }
+ setActive('lecture-16');
+ // Print: expand all cards, restore afterwards
+ var prev=[];
+ window.addEventListener('beforeprint',function(){prev=cards.map(function(c){return c.open});cards.forEach(function(c){c.open=true})});
+ window.addEventListener('afterprint',function(){cards.forEach(function(c,i){c.open=prev[i]})});
+})();
+</script>
+</body>
+</html>
