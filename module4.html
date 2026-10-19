@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="CS-301 Operating Systems — Module 4: Process Synchronization.">
+<title>CS-301: Operating Systems — Module 4</title>
+<style>
+:root{--bg:#fafaf9;--surf:#fff;--acc:#1e40af;--acc2:#0f766e;--tx:#1c1917;--mut:#57534e;--bd:#e7e5e4;--warn:#b45309;--warnbg:#fef3c7;--codebg:#f5f5f4;--c-com:#57534e;--c-kw:#1e40af;--c-str:#0f766e;--c-pre:#9a3412;
+--sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+[data-theme=dark]{--bg:#0c0a09;--surf:#1c1917;--acc:#60a5fa;--acc2:#5eead4;--tx:#fafaf9;--mut:#a8a29e;--bd:#292524;--warn:#fcd34d;--warnbg:#451a03;--codebg:#0c0a09;--c-com:#a8a29e;--c-kw:#60a5fa;--c-str:#5eead4;--c-pre:#fdba74}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:4.5rem}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--sans);font-weight:400;line-height:1.5}
+h1,h2,h3{font-family:var(--sans);line-height:1.25}
+a{color:var(--acc)}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+header{position:relative;padding:2rem 1rem 1rem;max-width:1100px;margin:0 auto}
+header h1{margin:0;font-size:clamp(1.6rem,4vw,2.4rem)}
+header .sub{margin:.25rem 0;font-size:1.15rem;color:var(--acc);font-weight:600}
+header .tag{margin:0;color:var(--mut);font-style:italic}
+#theme-toggle{position:absolute;top:1rem;right:1rem;width:2.5rem;height:2.5rem;border:1px solid var(--bd);border-radius:6px;background:var(--surf);color:var(--tx);font-size:1.2rem;cursor:pointer}
+.wrap{max-width:1100px;margin:0 auto;padding:0 1rem 3rem}
+.callout{background:var(--warnbg);color:var(--warn);border:1px solid var(--warn);border-left:6px solid var(--warn);border-radius:8px;padding:1.25rem;margin:1rem 0 2rem}
+.callout h2{margin:0 0 .5rem;font-size:1.25rem}
+.callout p{margin:0;font-size:1.05rem;font-weight:500}
+.modmeta{background:var(--surf);border:1px solid var(--bd);border-radius:8px;padding:1rem;margin-bottom:2rem}
+.modmeta h2{margin:0 0 .5rem;font-size:1.2rem}
+.modmeta p{margin:.35rem 0}
+.layout{display:block}
+nav#toc{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--bd);margin:0 -1rem 1.5rem;padding:.5rem 1rem;overflow-x:auto}
+nav#toc ul{list-style:none;margin:0;padding:0;display:flex;gap:.5rem;white-space:nowrap}
+nav#toc a{display:block;padding:.35rem .8rem;border:1px solid var(--bd);border-radius:6px;background:var(--surf);color:var(--tx);text-decoration:none;font-size:.9rem}
+nav#toc a.active{background:var(--acc);border-color:var(--acc);color:var(--bg);font-weight:600}
+nav#toc .toc-title{display:none}
+@media(min-width:1025px){
+ .layout{display:grid;grid-template-columns:240px 1fr;gap:2rem;align-items:start}
+ nav#toc{top:1rem;margin:0;padding:1rem;border:1px solid var(--bd);border-radius:8px;background:var(--surf);overflow:visible;max-height:calc(100vh - 2rem);overflow-y:auto}
+ nav#toc .toc-title{display:block;margin:0 0 .5rem;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+ nav#toc ul{flex-direction:column;white-space:normal;gap:.25rem}
+ nav#toc a{border:0;background:transparent;border-left:3px solid transparent;border-radius:0 6px 6px 0}
+ nav#toc a.active{background:transparent;color:var(--acc);border-left-color:var(--acc)}
+}
+details.card{background:var(--surf);border:1px solid var(--bd);border-radius:8px;margin-bottom:2rem;transition:box-shadow .2s}
+details.card:hover{box-shadow:0 4px 14px rgba(0,0,0,.12)}
+details.card>summary{cursor:pointer;padding:1rem;font-size:1.2rem;font-weight:700;list-style:none;display:flex;gap:.75rem;align-items:center}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::after{content:"▾";margin-left:auto;color:var(--mut)}
+details.card[open]>summary::after{content:"▴"}
+summary .num{background:var(--acc2);color:#fff;font-family:var(--mono);font-size:.85rem;padding:.2rem .5rem;border-radius:6px}
+[data-theme=dark] summary .num{color:#042f2e}
+.body{padding:0 1rem 1rem;border-top:1px solid var(--bd)}
+.sec{margin-top:1.25rem}
+.sec h3{margin:0 0 .5rem;font-size:1.05rem;color:var(--acc2)}
+.sec p{margin:.5rem 0}
+.sec ul{margin:.5rem 0;padding-left:1.25rem}
+.sec li{margin:.4rem 0}
+.terms{list-style:none;padding:0!important}
+.terms li{margin:.6rem 0}
+.chip{display:inline-block;font-family:var(--mono);font-size:.85rem;background:var(--codebg);color:var(--acc);border:1px solid var(--bd);border-radius:6px;padding:.1rem .5rem;margin-right:.35rem}
+pre{margin:.5rem 0;padding:1rem;background:var(--codebg);border:1px solid var(--bd);border-radius:6px;overflow-x:auto;font-family:var(--mono);font-size:.85rem;line-height:1.45;tab-size:4}
+pre code{font-family:inherit}
+.k-com{color:var(--c-com);font-style:italic}.k-kw{color:var(--c-kw);font-weight:600}.k-str{color:var(--c-str)}.k-pre{color:var(--c-pre)}
+.mind{font-family:var(--mono);font-size:.85rem;white-space:pre}
+.url{font-family:var(--mono);font-size:.85rem;word-break:break-all;color:var(--mut)}
+footer{max-width:1100px;margin:0 auto;padding:1rem;color:var(--mut);font-size:.85rem;border-top:1px solid var(--bd)}
+@media(max-width:480px){header{padding-top:3.5rem}.body{padding:0 .75rem .75rem}}
+@media print{
+ nav#toc,#theme-toggle{display:none!important}
+ body{background:#fff;color:#000}
+ .layout{display:block}
+ details.card{break-inside:auto;box-shadow:none!important;border-color:#999}
+ details.card>summary::after{content:""}
+ pre{white-space:pre-wrap;overflow:visible}
+ .callout{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<header>
+ <button id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+ <h1>CS-301: Operating Systems</h1>
+ <p class="sub">Module 4 — Process Synchronization (Weeks 6–7)</p>
+ <p class="tag">“Hook → Breakdown → Terms”</p>
+</header>
+
+<div class="wrap">
+<aside class="callout" role="note" aria-label="Module 4 thesis">
+ <h2>Module 4 Thesis: Shared State &amp; Synchronization</h2>
+ <p>Concurrent threads share a single address space and can overwrite a shared memory location at the exact same microsecond. Without coordination, data gets corrupted nondeterministically. How do we build software dams to guarantee mutual exclusion without causing performance gridlocks?</p>
+</aside>
+
+<section class="modmeta" aria-label="Module overview">
+ <h2>Module 4: Process Synchronization (Weeks 6–7)</h2>
+ <p><strong>Module Asset Managed:</strong> Shared global states, heap variables, and cooperative thread intersection boundaries.</p>
+ <p><strong>The Core Problem:</strong> Concurrent threads share a single address space and can overwrite a shared memory location at the exact same microsecond. Without coordination, data gets corrupted nondeterministically. How do we build software dams to guarantee mutual exclusion without causing performance gridlocks?</p>
+</section>
+
+<div class="layout">
+<nav id="toc" aria-label="Table of contents">
+ <p class="toc-title">Module 4 Contents</p>
+ <ul>
+  <li><a href="#lecture-14">L14 Race Conditions</a></li>
+  <li><a href="#lecture-15">L15 Deadlocks</a></li>
+  <li><a href="#lab-04">Lab 04 Producer-Consumer</a></li>
+ </ul>
+</nav>
+
+<main>
+
+<!-- ============ LECTURE 14 ============ -->
+<details class="card" id="lecture-14" open>
+<summary><span class="num">L14</span> Lecture 14: Race Conditions &amp; Mutual Exclusion</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Identify a data race condition inside a multi-threaded code block and refactor the code to guarantee mutual exclusion using a POSIX mutex lock.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>Module 3 (All Lectures), L09 (Threads &amp; Concurrency).</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Shared Digital Piggy Bank.</strong> Imagine a digital piggy bank shared between two siblings (Threads) who can both add money at the same time. The bank currently holds $100. Siblings A and B both want to add 1 at the exact same instant. Sibling A reads the balance (100). Right before Sibling A can write down 101, Sibling B barges in, reads the balance (100), and writes down $101. Sibling A then finishes their turn and writes down $101. Even though two separate dollars were added, the bank ends up short because one update overwrote the other. This is a Race Condition. To fix it, we introduce a Mutex Lock—a single physical bathroom key taped to the bank. A sibling must grab the key, lock the room, change the balance in total isolation, and return the key.</p></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>A Transactional Database Table Row Lock.</strong> A software mutex lock behaves identically to a hardware-enforced write-reservation token that blocks out raw processor access lines to a specific memory array address index until a commit sequence resolves.</p></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>Relies On: Module 3 (Memory Management)</strong> — Requires threads pointing to identical shared virtual memory page coordinates to manifest a race state.</li>
+<li><strong>Feeds Into: L15 (Classic Problems &amp; Deadlocks)</strong> — Introducing multiple independent mutex locks to protect complex data structures creates the precise architectural prerequisites for deadlock loops.</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p>When multiple concurrent execution contexts read and modify a shared variable simultaneously, the final outcome depends entirely on the unpredictable order in which the instruction lines interleave. This vulnerability is a Race Condition, and the specific block of code executing the modification is the Critical Section.</p>
+<p>To prevent corruption, we must enforce Mutual Exclusion—guaranteeing that only one thread can sit inside the critical section at any given time. This requires an atomic hardware instruction (like Test-and-Set or Compare-and-Swap) to verify and flip a Mutex flag in a single clock cycle without interruption.</p></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">Race Condition</code>A concurrency bug where the system output shifts nondeterministically based on the precise timing and execution order of overlapping threads.</li>
+<li><code class="chip">Critical Section</code>A structural window of source code that reads or writes to a shared, mutable global or heap state resource.</li>
+<li><code class="chip">Mutual Exclusion (Mutex)</code>A synchronization primitive that locks out concurrent access, ensuring only one execution thread can claim a resource slot.</li>
+<li><code class="chip">Atomic Operation</code>A low-level processor instruction sequence that executes completely to completion as a single indivisible unit without any possibility of preemption.</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><pre tabindex="0" class="code" aria-label="C code: mutex-protected shared counter"><code>// Refactoring a broken race-condition counter with a mutual exclusion lock
+#include &lt;pthread.h&gt;
+#include &lt;stdio.h&gt;
+
+int shared_balance = 100; // Shared resource in the data segment
+pthread_mutex_t bank_lock = PTHREAD_MUTEX_INITIALIZER; // The Mutex Primitive
+
+void* add_dollar_routine(void* arg) {
+    for(int i = 0; i &lt; 10000; i++) {
+        pthread_mutex_lock(&amp;bank_lock);   // Acquire exclusive access / entry path
+
+        // --- START CRITICAL SECTION ---
+        shared_balance++;                 // Shared state modification block
+        // ---- END CRITICAL SECTION ----
+
+        pthread_mutex_unlock(&amp;bank_lock); // Release lock / exit path
+    }
+    return NULL;
+}
+
+int main() {
+    pthread_t t1, t2;
+    pthread_create(&amp;t1, NULL, add_dollar_routine, NULL);
+    pthread_create(&amp;t2, NULL, add_dollar_routine, NULL);
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+    printf("Final absolute guaranteed balance: $%d\n", shared_balance); // Always 20100
+    return 0;
+}</code></pre></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Shared Whiteboard Disruption.</strong> Draw a large single number "0" on the center classroom whiteboard. Appoint two students to act as Threads. Instruct them that their only loop instruction is to read the board number, add 1 in their head, and write the new value over the old one. Have them both try to do this simultaneously as fast as possible with different colored markers. Watch how their writing overrides each other, leading to a corrupt, incorrect math total on the board, demonstrating a real data race.</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 14">CS 301: Operating Systems
+  └── Module 4: Process Synchronization
+        └── L14: Race Conditions
+              └── Critical Sections → Mutual Exclusion → Atomic Hardware Instructions</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LECTURE 15 ============ -->
+<details class="card" id="lecture-15">
+<summary><span class="num">L15</span> Lecture 15: Classic Synchronization Problems &amp; Deadlock Topologies</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Diagram resource dependency graphs to locate a circular wait condition and eliminate a deadlock trap by stripping out one of the four Coffman parameters.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>L14 (Race Conditions &amp; Mutual Exclusion).</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Dining Philosophers Dilemma.</strong> Imagine five philosophers sitting around a circular dinner table with exactly five forks total placed between them. To eat a bowl of noodles, a philosopher must pick up both their left fork and their right fork. Suddenly, all five philosophers reach out and grab their left fork at the exact same millisecond (Hold and Wait). Now, everyone holds one single fork, and nobody can grab their second fork because they are polite and refuse to rip a fork away from their neighbor (No Preemption). Everyone sits frozen staring at their food forever. This freeze is a Deadlock. To break it, the manager breaks the loop condition (Circular Wait) by forcing just one philosopher to grab their right fork first instead, shattering the lock gridlock immediately.</p></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>Two Bank Databases Stuck in Recursive Cross-Account Transfer Requests.</strong> A deadlock matches a distributed system deadlock where Database Process A locks Row 1 and waits for Row 2, while Database Process B simultaneously locks Row 2 and blocks waiting for Row 1 to clear.</p></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>Feeds Into: Module 5 (File &amp; Storage Management)</strong> — Concurrent read/write systems inside virtual file systems rely heavily on nested lock trees, which can crash the entire OS via kernel deadlocks if paths cross.</li>
+<li><strong>Feeds Into: Module 6 (I/O Device Management)</strong> — Interrupt handler routines must be written to avoid locking resources held by preempted threads, preventing deadlocks inside Ring 0.</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p>Synchronization primitives introduce complex resource interdependencies. A Deadlock is a state where a set of processes are permanently blocked because each process holds a resource and waits for another resource held by a different process in the same set.</p>
+<p>A deadlock cannot occur unless all Four Coffman Conditions hold true simultaneously: Mutual Exclusion (unshareable locks), Hold-and-Wait (retaining locks while queuing for others), No Preemption (locks cannot be forcefully stolen), and Circular Wait (a closed loop chain of dependency). To prevent deadlocks, system designers must break at least one of these conditions (e.g., enforcing a strict global lock acquisition ordering hierarchy to prevent circular wait).</p></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">Deadlock</code>A critical gridlock error state where multiple competing threads are paralyzed permanently while waiting for a closed loop of dependencies to clear.</li>
+<li><code class="chip">Semaphore</code>An advanced signaling synchronization variable that maintains an internal integer counter to manage thread traffic access caps.</li>
+<li><code class="chip">Coffman Conditions</code>The definitive mathematical requirements (Mutual Exclusion, Hold &amp; Wait, No Preemption, Circular Wait) that must all hold true for a deadlock to manifest.</li>
+<li><code class="chip">Circular Wait</code>An execution condition where a closed ring of processes exists such that each process waits for a resource held by the next process in the sequence loop.</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><pre tabindex="0" class="code" aria-label="C code: deterministic deadlock with two mutexes"><code>// Simulating a deterministic Deadlock gridlock condition
+#include &lt;pthread.h&gt;
+#include &lt;unistd.h&gt;
+
+pthread_mutex_t lock_A = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t lock_B = PTHREAD_MUTEX_INITIALIZER;
+
+void* thread_one_routine(void* arg) {
+    pthread_mutex_lock(&amp;lock_A);    // Claims Lock A
+    sleep(1);                       // Forces a preemption window context switch
+    pthread_mutex_lock(&amp;lock_B);    // Blocks waiting for Lock B held by Thread Two
+
+    pthread_mutex_unlock(&amp;lock_B);
+    pthread_mutex_unlock(&amp;lock_A);
+    return NULL;
+}
+
+void* thread_two_routine(void* arg) {
+    pthread_mutex_lock(&amp;lock_B);    // Claims Lock B
+    sleep(1);                       // Forces switch
+    pthread_mutex_lock(&amp;lock_A);    // Blocks waiting for Lock A held by Thread One
+
+    pthread_mutex_unlock(&amp;lock_A);
+    pthread_mutex_unlock(&amp;lock_B);
+    return NULL;
+}
+// RESULT: Both threads hang indefinitely. The application freezes solid.</code></pre></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Human Gridlock Loop.</strong> Arrange four student chairs in a tight square facing inward. Have four students sit down. Instruct them to reach out their right arm and firmly grab the left shoulder of the student sitting to their right (Hold and Wait). Now, instruct them that they cannot let go of a shoulder until their own left shoulder is released (No Preemption). Tell them to break free from the circle. Watch them realize they are deadlocked, and have them deduce which rule to drop to break the circle.</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 15">CS 301: Operating Systems
+  └── Module 4: Process Synchronization
+        └── L15: Classic Problems &amp; Deadlock
+              └── Producer-Consumer Semaphores → Coffman Quartet → Lock Ordering Preventions</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LAB 04 ============ -->
+<details class="card" id="lab-04">
+<summary><span class="num">LAB</span> Lab 04: The Broken Producer-Consumer Thread Correction Arena</summary>
+<article class="body">
+<section class="sec"><h3>🧪 Lab Assignment Target</h3><p>Lab 4: The Broken Producer-Consumer Thread Correction Arena</p></section>
+<section class="sec"><h3>📝 Task Description</h3><p>Students receive an intentionally broken multi-threaded bounded-buffer circular queue implementation in C. The provided code triggers severe race conditions and instant deadlocks under heavy thread load. Students must patch the source layout, embedding counting semaphores and mutex tracking blocks to restore thread safety.</p></section>
+<section class="sec"><h3>⚖️ Grading Weight Validation</h3><p>Evaluated by automated testing scripts running random stress threads to ensure the solution handles strict race conditions (Counts toward the 45% Lab block).</p></section>
+</article>
+</details>
+
+</main>
+</div>
+</div>
+
+<footer>CS-301: Operating Systems — Module 4: Process Synchronization (Weeks 6–7)</footer>
+
+<script>
+(function(){
+ var root=document.documentElement,btn=document.getElementById('theme-toggle');
+ // Dark/light toggle, persisted
+ try{var s=localStorage.getItem('theme');if(s){root.setAttribute('data-theme',s)}else if(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches){root.setAttribute('data-theme','dark')}}catch(e){}
+ btn.addEventListener('click',function(){
+  var n=root.getAttribute('data-theme')==='dark'?'light':'dark';
+  root.setAttribute('data-theme',n);
+  try{localStorage.setItem('theme',n)}catch(e){}
+ });
+ // Collapsible cards: open target card on link click / hash load
+ var cards=[].slice.call(document.querySelectorAll('details.card'));
+ function openHash(){var id=location.hash.slice(1),el=id&&document.getElementById(id);if(el&&el.tagName==='DETAILS'){el.open=true}}
+ window.addEventListener('hashchange',openHash);openHash();
+ // Scroll-spy
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ function setActive(id){links.forEach(function(a){var on=a.getAttribute('href')==='#'+id;a.classList.toggle('active',on);if(on){a.setAttribute('aria-current','true');var nav=document.getElementById('toc');if(nav.scrollWidth>nav.clientWidth&&nav.scrollHeight<=nav.clientHeight+2){nav.scrollLeft=a.offsetLeft-20}}else{a.removeAttribute('aria-current')}})}
+ if('IntersectionObserver' in window){
+  var vis={};
+  var io=new IntersectionObserver(function(es){
+   es.forEach(function(e){vis[e.target.id]=e.isIntersecting});
+   for(var i=0;i<cards.length;i++){if(vis[cards[i].id]){setActive(cards[i].id);return}}
+  },{rootMargin:'-20% 0px -60% 0px'});
+  cards.forEach(function(c){io.observe(c)});
+ }
+ setActive('lecture-14');
+ // Print: expand all cards, restore afterwards
+ var prev=[];
+ window.addEventListener('beforeprint',function(){prev=cards.map(function(c){return c.open});cards.forEach(function(c){c.open=true})});
+ window.addEventListener('afterprint',function(){cards.forEach(function(c,i){c.open=prev[i]})});
+ // Lightweight C syntax colouring (comments, strings, keywords) via CSS classes
+ var kw=/\b(void|int|char|if|else|return|for|NULL)\b/g;
+ document.querySelectorAll('pre.code code').forEach(function(code){
+  code.innerHTML=code.innerHTML.split('\n').map(function(line){
+   var m=line.match(/^(.*?)(\/\/.*)$/);
+   var head=m?m[1]:line,tail=m?'<span class="k-com">'+m[2]+'</span>':'';
+   if(/^\s*#include/.test(head)){return '<span class="k-pre">'+head+'</span>'+tail}
+   var parts=head.split(/("(?:[^"\\]|\\.)*")/);
+   head=parts.map(function(p,i){return i%2?'<span class="k-str">'+p+'</span>':p.replace(kw,'<span class="k-kw">$1</span>')}).join('');
+   return head+tail;
+  }).join('\n');
+ });
+})();
+</script>
+</body>
+</html>
