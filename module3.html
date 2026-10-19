@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="CS-301 Operating Systems — Module 3: Memory Management.">
+<title>CS-301: Operating Systems — Module 3</title>
+<style>
+:root{--bg:#fafaf9;--surf:#fff;--acc:#1e40af;--acc2:#0f766e;--tx:#1c1917;--mut:#57534e;--bd:#e7e5e4;--warn:#b45309;--warnbg:#fef3c7;--codebg:#f5f5f4;
+--sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+[data-theme=dark]{--bg:#0c0a09;--surf:#1c1917;--acc:#60a5fa;--acc2:#5eead4;--tx:#fafaf9;--mut:#a8a29e;--bd:#292524;--warn:#fcd34d;--warnbg:#451a03;--codebg:#0c0a09}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:4.5rem}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--sans);font-weight:400;line-height:1.5}
+h1,h2,h3{font-family:var(--sans);line-height:1.25}
+a{color:var(--acc)}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+header{position:relative;padding:2rem 1rem 1rem;max-width:1100px;margin:0 auto}
+header h1{margin:0;font-size:clamp(1.6rem,4vw,2.4rem)}
+header .sub{margin:.25rem 0;font-size:1.15rem;color:var(--acc);font-weight:600}
+header .tag{margin:0;color:var(--mut);font-style:italic}
+#theme-toggle{position:absolute;top:1rem;right:1rem;width:2.5rem;height:2.5rem;border:1px solid var(--bd);border-radius:6px;background:var(--surf);color:var(--tx);font-size:1.2rem;cursor:pointer}
+.wrap{max-width:1100px;margin:0 auto;padding:0 1rem 3rem}
+.callout{background:var(--warnbg);color:var(--warn);border:1px solid var(--warn);border-left:6px solid var(--warn);border-radius:8px;padding:1.25rem;margin:1rem 0 2rem}
+.callout h2{margin:0 0 .5rem;font-size:1.25rem}
+.callout p{margin:0;font-size:1.05rem;font-weight:500}
+.modmeta{background:var(--surf);border:1px solid var(--bd);border-radius:8px;padding:1rem;margin-bottom:2rem}
+.modmeta h2{margin:0 0 .5rem;font-size:1.2rem}
+.modmeta p{margin:.35rem 0}
+.layout{display:block}
+nav#toc{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--bd);margin:0 -1rem 1.5rem;padding:.5rem 1rem;overflow-x:auto}
+nav#toc ul{list-style:none;margin:0;padding:0;display:flex;gap:.5rem;white-space:nowrap}
+nav#toc a{display:block;padding:.35rem .8rem;border:1px solid var(--bd);border-radius:6px;background:var(--surf);color:var(--tx);text-decoration:none;font-size:.9rem}
+nav#toc a.active{background:var(--acc);border-color:var(--acc);color:var(--bg);font-weight:600}
+nav#toc .toc-title{display:none}
+@media(min-width:1025px){
+ .layout{display:grid;grid-template-columns:240px 1fr;gap:2rem;align-items:start}
+ nav#toc{top:1rem;margin:0;padding:1rem;border:1px solid var(--bd);border-radius:8px;background:var(--surf);overflow:visible;max-height:calc(100vh - 2rem);overflow-y:auto}
+ nav#toc .toc-title{display:block;margin:0 0 .5rem;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+ nav#toc ul{flex-direction:column;white-space:normal;gap:.25rem}
+ nav#toc a{border:0;background:transparent;border-left:3px solid transparent;border-radius:0 6px 6px 0}
+ nav#toc a.active{background:transparent;color:var(--acc);border-left-color:var(--acc)}
+}
+details.card{background:var(--surf);border:1px solid var(--bd);border-radius:8px;margin-bottom:2rem;transition:box-shadow .2s}
+details.card:hover{box-shadow:0 4px 14px rgba(0,0,0,.12)}
+details.card>summary{cursor:pointer;padding:1rem;font-size:1.2rem;font-weight:700;list-style:none;display:flex;gap:.75rem;align-items:center}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::after{content:"▾";margin-left:auto;color:var(--mut)}
+details.card[open]>summary::after{content:"▴"}
+summary .num{background:var(--acc2);color:#fff;font-family:var(--mono);font-size:.85rem;padding:.2rem .5rem;border-radius:6px}
+[data-theme=dark] summary .num{color:#042f2e}
+.body{padding:0 1rem 1rem;border-top:1px solid var(--bd)}
+.sec{margin-top:1.25rem}
+.sec h3{margin:0 0 .5rem;font-size:1.05rem;color:var(--acc2)}
+.sec p{margin:.5rem 0}
+.sec ul{margin:.5rem 0;padding-left:1.25rem}
+.sec li{margin:.4rem 0}
+.terms{list-style:none;padding:0!important}
+.terms li{margin:.6rem 0}
+.chip{display:inline-block;font-family:var(--mono);font-size:.85rem;background:var(--codebg);color:var(--acc);border:1px solid var(--bd);border-radius:6px;padding:.1rem .5rem;margin-right:.35rem}
+pre{margin:.5rem 0;padding:1rem;background:var(--codebg);border:1px solid var(--bd);border-radius:6px;overflow-x:auto;font-family:var(--mono);font-size:.85rem;line-height:1.5}
+pre.plain{white-space:pre-wrap;overflow-wrap:anywhere}
+.mind{font-family:var(--mono);font-size:.85rem;white-space:pre}
+.url{font-family:var(--mono);font-size:.85rem;word-break:break-all;color:var(--mut)}
+footer{max-width:1100px;margin:0 auto;padding:1rem;color:var(--mut);font-size:.85rem;border-top:1px solid var(--bd)}
+@media(max-width:480px){header{padding-top:3.5rem}.body{padding:0 .75rem .75rem}}
+@media print{
+ nav#toc,#theme-toggle{display:none!important}
+ body{background:#fff;color:#000}
+ .layout{display:block}
+ details.card{break-inside:auto;box-shadow:none!important;border-color:#999}
+ details.card>summary::after{content:""}
+ pre{white-space:pre-wrap;overflow:visible}
+ .callout{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<header>
+ <button id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+ <h1>CS-301: Operating Systems</h1>
+ <p class="sub">Module 3 — Memory Management (Weeks 8–10)</p>
+ <p class="tag">“Hook → Breakdown → Terms”</p>
+</header>
+
+<div class="wrap">
+<aside class="callout" role="note" aria-label="Module 3 thesis">
+ <h2>Module 3 Thesis: The Memory Illusion</h2>
+ <p>Programs are written assuming they are the sole owner of the machine's memory layout and start at address zero. How do we trick multiple competing apps into sharing a single RAM chip without reading or corrupting each other's private data?</p>
+</aside>
+
+<section class="modmeta" aria-label="Module overview">
+ <h2>Module 3: Memory Management (Weeks 8–10)</h2>
+ <p><strong>Module Asset Managed:</strong> Physical Random Access Memory (RAM) chips and hardware translation registers.</p>
+ <p><strong>The Core Problem:</strong> Programs are written assuming they are the sole owner of the machine's memory layout and start at address zero. How do we trick multiple competing apps into sharing a single RAM chip without reading or corrupting each other's private data?</p>
+</section>
+
+<div class="layout">
+<nav id="toc" aria-label="Table of contents">
+ <p class="toc-title">Module 3 Contents</p>
+ <ul>
+  <li><a href="#lecture-10">L10 Base-and-Bound</a></li>
+  <li><a href="#lecture-11">L11 Paging Model</a></li>
+  <li><a href="#lecture-12">L12 TLB &amp; EAT</a></li>
+  <li><a href="#lecture-13">L13 Virtual Memory</a></li>
+  <li><a href="#lab-03">Lab 03 Page Table</a></li>
+ </ul>
+</nav>
+
+<main>
+
+<!-- ============ LECTURE 10 ============ -->
+<details class="card" id="lecture-10" open>
+<summary><span class="num">L10</span> Lecture 10: Relocation Models &amp; Base-and-Bound Isolation</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Calculate valid physical memory address locations from logical addresses given specific Base and Bound hardware register limits, and catch security bounds exceptions.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>Module 2 (All Lectures), hardware registers.</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Hotel Room Numbering Illusion.</strong> Imagine a large hotel resort. Every single guest checking in receives an automated room booklet that says they are staying in "Room 100" (The Logical Address). When they go to find their room, they must use a master keycard lock. The hotel's physical architecture silently maps each guest's "Room 100" to a completely different floor. For Guest A, the room starts at real room 500 (Base Register = 500) and they only paid for a small 10-room suite (Bound Register = 10). If Guest A tries to open "Room 115", their keycard fails because it exceeds their bound boundary. Guest B's "Room 100" starts at real room 800. They both think they occupy address 100, but the front desk (The OS) relocates them seamlessly.</p></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>An Offset Array Pointer Index.</strong> Base-and-bound protection behaves identically to a safe compiler runtime wrapper around a raw byte array pointer. The Base register functions as the absolute starting array memory address (<code class="chip">&amp;array[0]</code>), while the Bound register acts as a strict <code class="chip">if (index &gt;= length)</code> array bounds check.</p></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>Relies On: L02 (Dual-Mode Barrier)</strong> — Relies on Ring 0 privileges to lock the physical Base and Bound registers so user threads cannot change their own memory space walls.</li>
+<li><strong>Feeds Into: L11 (The Paging Model)</strong> — Serves as the historical precursor that proves contiguous variable-sized memory allocations lead to severe external fragmentation, driving the invention of fixed-size paging.</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p>To achieve multiprocessing, memory must be virtualized. The earliest model used Dynamic Relocation via hardware registers. When a program is loaded into RAM, the kernel notes its physical starting location into a hardware Base Register and its maximum allowable block size into a Bound Register.</p>
+<p>The CPU uses these to evaluate every instruction at runtime: Physical Address = Logical Address + Base. If the logical address is less than zero or greater than or equal to the Bound register, the hardware interrupts execution instantly and throws a segmentation fault trap.</p></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">Logical Address</code>A virtual address generated by the compiler and CPU instruction stream during development and runtime execution.</li>
+<li><code class="chip">Physical Address</code>The actual, hardware-wired slot location inside the physical RAM chip matrix.</li>
+<li><code class="chip">Base Register</code>A physical CPU tracking chip that stores the absolute starting physical address of a program's active memory slot.</li>
+<li><code class="chip">Bound Register</code>A physical hardware safety register tracking the maximum size allocation block granted to a running process context.</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><pre class="plain" tabindex="0" aria-label="Relocation worked problem">Mathematical Relocation Problem: A process has a hardware configuration setup where Base = 14000 and Bound = 2000.
+
+Scenario A: The CPU attempts to fetch an instruction from Logical Address 450. Is it safe? 450 &lt; 2000 (Passes Bound Check). Physical Destination = 450 + 14000 = 14450. (Valid execution).
+
+Scenario B: The CPU attempts a memory operation on Logical Address 2100. Is it safe? 2100 ≥ 2000 (Exceeds Bounds!). The hardware immediately triggers a CPU exception trap, terminating the task with a Segmentation Fault panic.</pre></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Chalkboard Relocation Machine.</strong> Draw a grid of numbers 0 to 100 on the board to represent physical RAM. Hand two students dry-erase markers. Assign Student 1 a Base of 20 and a Bound of 10. Assign Student 2 a Base of 50 and a Bound of 15. Shout out logical addresses like "Student 1, modify location 5!" or "Student 2, access location 20!" Have the class audit if the student writes on the correct physical grid square or if they must freeze and yell "Segmentation Fault!"</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 10">CS 301: Operating Systems
+  └── Module 3: Memory Management
+        └── L10: Relocation Models
+              └── Logical vs Physical Spaces → Base/Bound Address Hardware Checks</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LECTURE 11 ============ -->
+<details class="card" id="lecture-11">
+<summary><span class="num">L11</span> Lecture 11: The Paging Model &amp; Fixed-Size Translation Matrix</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Trace a 32-bit virtual address stream into its corresponding physical address destination using a multi-level page table schematic layout.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>L10 (Relocation Models), binary-to-hex conversion tracking, basic algebra.</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Phonebook Indexed Ledger Page.</strong> Imagine trying to read a giant encyclopedic novel that has been completely ripped apart, separated into single loose paper pages, and scattered randomly across different drawers in a room. To read the book in order, you need a single index card cheat-sheet—the Page Table. The book is written in logical order: Chapter 1 is on Page 0, Chapter 2 is on Page 1. The index cheat-sheet tells you: "Page 0 is hiding in Drawer #4" (Physical Frame 4), and "Page 1 is hiding in Drawer #99" (Physical Frame 99). You can read smoothly because your index map fixes the scattered physical chaos transparently.</p></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>A Key-Value Hash Map Pointer Array lookup.</strong> Paging functions exactly like a hardware-level multi-dimensional array lookup table, where the high-order binary bits of an address stream are peeled off to serve as the index key to return a raw data pointer address.</p></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>Relies On: L05 (Process Anatomy)</strong> — Every independent process PCB structure must preserve a pointer to its own unique isolated physical Page Table location.</li>
+<li><strong>Feeds Into: L12 (TLB Acceleration)</strong> — Address translation requires a nested memory access path, necessitating a specialized hardware cache to maintain high-speed throughput.</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p>Base-and-bound models cause severe External Fragmentation (wasted space between allocations). Paging fixes this by chopping memory into fixed-size units. Virtual memory is split into Pages, and physical memory is split into identical matching blocks called Frames.</p>
+<p>A virtual address is split into two components: a Page Number (p) and an Offset (d). The hardware Memory Management Unit (MMU) grabs the Page Number, checks it against the process's Page Table to find the corresponding physical Frame Number (f), and appends the unchanged Offset to land precisely on the correct physical byte. This completely eliminates external fragmentation.</p></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">Page</code>A fixed-size contiguous block of virtual address space allocated by the compiler and operating system kernel.</li>
+<li><code class="chip">Frame</code>A physical, hardware-wired block of real RAM storage matching the exact byte dimensions of a system page slot.</li>
+<li><code class="chip">Page Table</code>The authoritative data matrix structure held in kernel space that maps a process's virtual page numbers to real hardware frame slots.</li>
+<li><code class="chip">Internal Fragmentation</code>Wasted memory space that occurs when a process requests a buffer that doesn't completely fill out the final allocated fixed-size page block boundaries.</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><pre class="plain" tabindex="0" aria-label="Basic paging mapping walkthrough">Basic Paging Mapping Walkthrough: Assume a system has a small 16-byte virtual address space with 4-byte pages. The virtual address is 4 bits wide: 2 bits for Page Number, 2 bits for Offset.
+
+We want to translate Virtual Address 1101 in binary.
+
+Step 1: Separate the components. The first two bits 11 = Page Number 3. The last two bits 01 = Offset 1.
+Step 2: Lookup Page 3 in our Page Table matrix array. The table says: Page 3 -&gt; Frame 5 (Binary 101).
+Step 3: Assemble the final physical destination. Combine Frame 101 with the original unchanged offset 01 = Physical Address 10101 (Real decimal address 21).</pre></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Multi-Level Page Walk Board Routing Game.</strong> Draw a two-tier array grid layout on the main classroom board representing a Page Directory and a secondary Page Table. Hand a student a card displaying a hexadecimal virtual address string. Have them act as the hardware MMU chip, tracing their finger from the first bits to the directory block, down to the frame cell pointer, to prove they can resolve the physical destination by hand.</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 11">CS 301: Operating Systems
+  └── Module 3: Memory Management
+        └── L11: The Paging Model
+              └── Pages &amp; Frames Allocation → MMU Bitwise Address Offsets</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LECTURE 12 ============ -->
+<details class="card" id="lecture-12">
+<summary><span class="num">L12</span> Lecture 12: TLB Acceleration &amp; Caching Math</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Calculate Effective Access Time (EAT) equations using hit-rate variables, hardware cache check latencies, and physical RAM access latency boundaries.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>L11 (The Paging Model), basic algebra equations.</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Sticky Note on the Computer Monitor.</strong> Imagine you work as a researcher who constantly needs to look up phone numbers in a massive 1,000-page directory book kept across the room (The Page Table in RAM). Every single time you want to make a call, walking across the room to check the book slows you down heavily. To solve this, you stick a small piece of paper right next to your telephone (The TLB Cache). When you look up a number for the first time, you write it on the sticky note. The next time you call that exact same person, you don't walk across the room; you glance at the sticky note instantly (TLB Hit). You only walk to the heavy phonebook if the note is missing the name (TLB Miss).</p></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>A Local Storage Key-Cache Web Proxy.</strong> A Translation Lookaside Buffer functions identically to an ultra-fast hardware register cache layer that intercept routes recursive database index scans using local static memory chips.</p></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>Relies On: L11 (Paging Model)</strong> — Integrates directly inside the bit-shifting logic of the MMU address translation processing pathway.</li>
+<li><strong>Feeds Into: L13 (Virtual Memory)</strong> — A TLB miss pattern can cascade down to trigger a complete disk-drive swap block search if a page is marked as absent.</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p>Paging introduces a severe performance penalty: every memory access costs two trips to physical RAM (one trip to read the page table entry, and a second trip to read the actual target data byte). This slows systems down by 50%.</p>
+<p>To resolve this, hardware designers integrated a Translation Lookaside Buffer (TLB) directly into the CPU MMU. The TLB is an ultra-fast associative hardware cache that stores recent virtual-to-physical address translations. When a virtual address is processed, the TLB is checked in parallel. If a match occurs (TLB Hit), the translation is resolved instantly, bypassing the page table memory trip completely.</p></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">Translation Lookaside Buffer (TLB)</code>A specialized hardware cache embedded inside the CPU MMU dedicated exclusively to accelerating virtual address mapping scans.</li>
+<li><code class="chip">TLB Hit Rate</code>The statistical percentage frequency representing how often a target virtual address translation is successfully resolved inside the fast cache layer.</li>
+<li><code class="chip">TLB Miss</code>A scenario where a virtual address is absent from the TLB, forcing the system to perform a slower, multi-step page table walk across main RAM.</li>
+<li><code class="chip">Effective Access Time (EAT)</code>The calculated average operational time cost paid by a system to resolve a memory data request stream.</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><pre class="plain" tabindex="0" aria-label="Effective access time calculation">Effective Access Time Calculation Equation Formulation: Assume main memory access latency costs 100ns, checking the hardware TLB cache chip costs 1ns, and our system has a verified 90% TLB Hit Rate.
+
+EAT = (HitRate × [TLBLookup + MemoryAccess]) + (MissRate × [TLBLookup + TwoMemoryAccesses])
+EAT = (0.90 × [1ns + 100ns]) + (0.10 × [1ns + 100ns + 100ns])
+EAT = (0.90 × 101ns) + (0.10 × 201ns) = 90.9ns + 20.1ns = 111ns
+
+(This shows that with a high hit rate, our average memory trip costs only 111ns instead of the unaccelerated 200ns double-trip penalty).</pre></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Real-Time Latency Math Challenge.</strong> Write the EAT equation on the projector. Change the Hit Rate live from 95% down to 20% (simulating heavy cache thrashing code). Have students calculate and plot the resulting curve to visually discover how writing cache-unfriendly array looping code can choke execution performance.</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 12">CS 301: Operating Systems
+  └── Module 3: Memory Management
+        └── L12: TLB Acceleration
+              └── Cache Hits/Misses → EAT Calculation Latency Projections</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LECTURE 13 ============ -->
+<details class="card" id="lecture-13">
+<summary><span class="num">L13</span> Lecture 13: Virtual Memory, Demand Paging &amp; Page Replacement Primitives</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Trace a page reference execution string manually through FIFO and LRU page replacement pipelines, and accurately log final Page Fault counts.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>L11, L12, basic logic queues.</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Limited Desk and the Library Storage Stacks.</strong> Imagine you are studying in a massive university library. Your study desk can only fit exactly 3 books at a time (Physical Frame Allocation). You are currently writing an essay that references 10 different books (Virtual Address Space). You start working; you look for Book A on your desk. It isn't there! This is a Page Fault. You must pause your work, wait for a runner to fetch Book A from the deep basement storage stacks (The Hard Disk/Swap Space), and drop it onto your desk. When your desk fills up completely and you need a 4th book, you must choose one current book to throw off your desk and send back to the basement stacks (Page Replacement Policy).</p></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>An On-Demand Network Streaming Video Buffer.</strong> Demand paging matches media streaming platforms that load only the immediate 10 seconds of a massive 4K movie file into active memory, swapping old data blocks clear out of local cache boundaries when the player scrubs to a new section.</p></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>Feeds Into: Module 4 (Process Synchronization)</strong> — Because virtual memory allows multiple concurrent threads to securely share specific page entries, it sets the stage for race condition contentions.</li>
+<li><strong>Feeds Into: Module 5 (File &amp; Storage Management)</strong> — Swapping unmapped dirty pages out of RAM requires directly orchestrating raw block writes to disk storage partitions.</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p>Demand Paging allows an operating system to execute an application even if its total memory footprint is vastly larger than the computer's physical RAM chip. The kernel leverages a Present/Absent Bit inside each page table entry. If a thread attempts to access a virtual page marked as absent, the hardware MMU cannot translate it and triggers a specialized Page Fault Exception Interrupt.</p>
+<p>The kernel intercepts this fault, halts the thread, locates the missing block inside the disk Swap Space, copies the page into an empty physical frame, updates the page table bit, and rewinds the CPU to retry the instruction. If no physical frames are vacant, a replacement algorithm—such as FIFO (First-In, First-Out) or LRU (Least Recently Used)—is invoked to evict a page.</p></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">Demand Paging</code>An optimization mechanism where virtual pages are loaded into physical RAM strictly on-demand only when an active instruction requests them.</li>
+<li><code class="chip">Page Fault</code>A valid hardware exception interrupt triggered when a thread attempts an operation on a page marked as absent from physical RAM.</li>
+<li><code class="chip">Swap Space</code>A designated raw block sector layout on a hard drive or SSD used to cache evicted virtual page overflows.</li>
+<li><code class="chip">Thrashing</code>A critical system failure state where a machine spends more time continuously swapping blocks back and forth to disk than executing actual instruction paths.</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><pre class="plain" tabindex="0" aria-label="FIFO versus LRU page replacement trace">Page-Reference String FIFO vs LRU Tracing Comparison Exercise: Given a 3-frame allocation pool and the reference string: 1, 2, 3, 4, 1, 2.
+
+FIFO Execution Trace:
+Access 1, 2, 3 -&gt; Loads into frames [1, 2, 3] -&gt; 3 Page Faults
+Access 4 -&gt; Evicts oldest page (1) -&gt; Frames become [4, 2, 3] -&gt; 4th Page Fault
+Access 1 -&gt; Evicts next oldest (2) -&gt; Frames become [4, 1, 3] -&gt; 5th Page Fault
+Access 2 -&gt; Evicts next oldest (3) -&gt; Frames become [4, 1, 2] -&gt; 6th Page Fault (Total Faults = 6).
+
+LRU Execution Trace:
+Access 1, 2, 3 -&gt; Loads into frames [1, 2, 3] -&gt; 3 Page Faults
+Access 4 -&gt; Evicts least recently used page (1) -&gt; Frames become [4, 2, 3] -&gt; 4th Page Fault
+Access 1 -&gt; Evicts least recently used page (2, since 3 was touched after 2) -&gt; Frames become [4, 1, 3] -&gt; 5th Page Fault
+Access 2 -&gt; Evicts least recently used page (3) -&gt; Frames become [4, 1, 2] -&gt; 6th Page Fault (Total Faults = 6).</pre></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Human Reference String LRU Simulation.</strong> Line up three empty chairs at the front of the room to serve as a 3-frame RAM block. Call out numbers from a string. Have students carrying matching numeric cards rush up to sit in an empty chair. When a student arrives and all chairs are full, instruct the class to evaluate who has been sitting in their chair the longest without being touched, and make that student vacate their seat back to the lobby.</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 13">CS 301: Operating Systems
+  └── Module 3: Memory Management
+        └── L13: Virtual Memory &amp; Demand Paging
+              └── Page Fault Flags → Replacement Routines (FIFO, LRU) → Thrashing Collapse</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LAB 03 ============ -->
+<details class="card" id="lab-03">
+<summary><span class="num">LAB</span> Lab 03: Toy Page-Table Bitwise Software Simulator</summary>
+<article class="body">
+<section class="sec"><h3>🧪 Lab Assignment Target</h3><p>Lab 3: Toy Page-Table Bitwise Software Simulator</p></section>
+<section class="sec"><h3>📝 Task Description</h3><p>Students construct a functional software translation matrix in C. They write bit-masking operators to parse virtual hex addresses into Page Numbers and offsets, manage a mock array-based page table, simulate TLB cache hits, and accurately simulate Page Fault counter flags when an access drops out of bounds.</p></section>
+<section class="sec"><h3>⚖️ Grading Weight Validation</h3><p>Automated parsing scripts run strict bit-level address verification streams (Counts toward the 45% Lab block).</p></section>
+</article>
+</details>
+
+</main>
+</div>
+</div>
+
+<footer>CS-301: Operating Systems — Module 3: Memory Management (Weeks 8–10)</footer>
+
+<script>
+(function(){
+ var root=document.documentElement,btn=document.getElementById('theme-toggle');
+ // Dark/light toggle, persisted
+ try{var s=localStorage.getItem('theme');if(s){root.setAttribute('data-theme',s)}else if(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches){root.setAttribute('data-theme','dark')}}catch(e){}
+ btn.addEventListener('click',function(){
+  var n=root.getAttribute('data-theme')==='dark'?'light':'dark';
+  root.setAttribute('data-theme',n);
+  try{localStorage.setItem('theme',n)}catch(e){}
+ });
+ // Collapsible cards: open target card on link click / hash load
+ var cards=[].slice.call(document.querySelectorAll('details.card'));
+ function openHash(){var id=location.hash.slice(1),el=id&&document.getElementById(id);if(el&&el.tagName==='DETAILS'){el.open=true}}
+ window.addEventListener('hashchange',openHash);openHash();
+ // Scroll-spy
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ function setActive(id){links.forEach(function(a){var on=a.getAttribute('href')==='#'+id;a.classList.toggle('active',on);if(on){a.setAttribute('aria-current','true');var nav=document.getElementById('toc');if(nav.scrollWidth>nav.clientWidth&&nav.scrollHeight<=nav.clientHeight+2){nav.scrollLeft=a.offsetLeft-20}}else{a.removeAttribute('aria-current')}})}
+ if('IntersectionObserver' in window){
+  var vis={};
+  var io=new IntersectionObserver(function(es){
+   es.forEach(function(e){vis[e.target.id]=e.isIntersecting});
+   for(var i=0;i<cards.length;i++){if(vis[cards[i].id]){setActive(cards[i].id);return}}
+  },{rootMargin:'-20% 0px -60% 0px'});
+  cards.forEach(function(c){io.observe(c)});
+ }
+ setActive('lecture-10');
+ // Print: expand all cards, restore afterwards
+ var prev=[];
+ window.addEventListener('beforeprint',function(){prev=cards.map(function(c){return c.open});cards.forEach(function(c){c.open=true})});
+ window.addEventListener('afterprint',function(){cards.forEach(function(c,i){c.open=prev[i]})});
+})();
+</script>
+</body>
+</html>
