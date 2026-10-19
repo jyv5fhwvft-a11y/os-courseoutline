@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="CS-301 Operating Systems — Module 7: Security & Protection.">
+<title>CS-301: Operating Systems — Module 7</title>
+<style>
+:root{--bg:#fafaf9;--surf:#fff;--acc:#1e40af;--acc2:#0f766e;--tx:#1c1917;--mut:#57534e;--bd:#e7e5e4;--warn:#b45309;--warnbg:#fef3c7;--codebg:#f5f5f4;
+--sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+[data-theme=dark]{--bg:#0c0a09;--surf:#1c1917;--acc:#60a5fa;--acc2:#5eead4;--tx:#fafaf9;--mut:#a8a29e;--bd:#292524;--warn:#fcd34d;--warnbg:#451a03;--codebg:#0c0a09}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:4.5rem}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--sans);font-weight:400;line-height:1.5}
+h1,h2,h3{font-family:var(--sans);line-height:1.25}
+a{color:var(--acc)}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+header{position:relative;padding:2rem 1rem 1rem;max-width:1100px;margin:0 auto}
+header h1{margin:0;font-size:clamp(1.6rem,4vw,2.4rem)}
+header .sub{margin:.25rem 0;font-size:1.15rem;color:var(--acc);font-weight:600}
+header .tag{margin:0;color:var(--mut);font-style:italic}
+#theme-toggle{position:absolute;top:1rem;right:1rem;width:2.5rem;height:2.5rem;border:1px solid var(--bd);border-radius:6px;background:var(--surf);color:var(--tx);font-size:1.2rem;cursor:pointer}
+.wrap{max-width:1100px;margin:0 auto;padding:0 1rem 3rem}
+.callout{background:var(--warnbg);color:var(--warn);border:1px solid var(--warn);border-left:6px solid var(--warn);border-radius:8px;padding:1.25rem;margin:1rem 0 2rem}
+.callout h2{margin:0 0 .5rem;font-size:1.25rem}
+.callout p{margin:0;font-size:1.05rem;font-weight:500}
+.modmeta{background:var(--surf);border:1px solid var(--bd);border-radius:8px;padding:1rem;margin-bottom:2rem}
+.modmeta h2{margin:0 0 .5rem;font-size:1.2rem}
+.modmeta p{margin:.35rem 0}
+.layout{display:block}
+nav#toc{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--bd);margin:0 -1rem 1.5rem;padding:.5rem 1rem;overflow-x:auto}
+nav#toc ul{list-style:none;margin:0;padding:0;display:flex;gap:.5rem;white-space:nowrap}
+nav#toc a{display:block;padding:.35rem .8rem;border:1px solid var(--bd);border-radius:6px;background:var(--surf);color:var(--tx);text-decoration:none;font-size:.9rem}
+nav#toc a.active{background:var(--acc);border-color:var(--acc);color:var(--bg);font-weight:600}
+nav#toc .toc-title{display:none}
+@media(min-width:1025px){
+ .layout{display:grid;grid-template-columns:240px 1fr;gap:2rem;align-items:start}
+ nav#toc{top:1rem;margin:0;padding:1rem;border:1px solid var(--bd);border-radius:8px;background:var(--surf);overflow:visible;max-height:calc(100vh - 2rem);overflow-y:auto}
+ nav#toc .toc-title{display:block;margin:0 0 .5rem;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+ nav#toc ul{flex-direction:column;white-space:normal;gap:.25rem}
+ nav#toc a{border:0;background:transparent;border-left:3px solid transparent;border-radius:0 6px 6px 0}
+ nav#toc a.active{background:transparent;color:var(--acc);border-left-color:var(--acc)}
+}
+details.card{background:var(--surf);border:1px solid var(--bd);border-radius:8px;margin-bottom:2rem;transition:box-shadow .2s}
+details.card:hover{box-shadow:0 4px 14px rgba(0,0,0,.12)}
+details.card>summary{cursor:pointer;padding:1rem;font-size:1.2rem;font-weight:700;list-style:none;display:flex;gap:.75rem;align-items:center}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::after{content:"▾";margin-left:auto;color:var(--mut)}
+details.card[open]>summary::after{content:"▴"}
+summary .num{background:var(--acc2);color:#fff;font-family:var(--mono);font-size:.85rem;padding:.2rem .5rem;border-radius:6px}
+[data-theme=dark] summary .num{color:#042f2e}
+.body{padding:0 1rem 1rem;border-top:1px solid var(--bd)}
+.sec{margin-top:1.25rem}
+.sec h3{margin:0 0 .5rem;font-size:1.05rem;color:var(--acc2)}
+.sec p{margin:.5rem 0}
+.sec ul{margin:.5rem 0;padding-left:1.25rem}
+.sec li{margin:.4rem 0}
+.terms{list-style:none;padding:0!important}
+.terms li{margin:.6rem 0}
+.chip{display:inline-block;font-family:var(--mono);font-size:.85rem;background:var(--codebg);color:var(--acc);border:1px solid var(--bd);border-radius:6px;padding:.1rem .5rem;margin-right:.35rem}
+pre{margin:.5rem 0;padding:1rem;background:var(--codebg);border:1px solid var(--bd);border-radius:6px;overflow-x:auto;font-family:var(--mono);font-size:.85rem;line-height:1.5}
+.mind{font-family:var(--mono);font-size:.85rem;white-space:pre}
+.url{font-family:var(--mono);font-size:.85rem;word-break:break-all;color:var(--mut)}
+footer{max-width:1100px;margin:0 auto;padding:1rem;color:var(--mut);font-size:.85rem;border-top:1px solid var(--bd)}
+@media(max-width:480px){header{padding-top:3.5rem}.body{padding:0 .75rem .75rem}}
+@media print{
+ nav#toc,#theme-toggle{display:none!important}
+ body{background:#fff;color:#000}
+ .layout{display:block}
+ details.card{break-inside:auto;box-shadow:none!important;border-color:#999}
+ details.card>summary::after{content:""}
+ pre{white-space:pre-wrap;overflow:visible}
+ .callout{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<header>
+ <button id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+ <h1>CS-301: Operating Systems</h1>
+ <p class="sub">Module 7 — Security &amp; Protection (Weeks 14–15)</p>
+ <p class="tag">“Hook → Breakdown → Terms”</p>
+</header>
+
+<div class="wrap">
+<aside class="callout" role="note" aria-label="Module 7 thesis">
+ <h2>Module 7 Thesis: Security &amp; Protection</h2>
+ <p>How do we ensure that user Alice cannot read user Bob's files, and that malware cannot exploit a bug to seize control of the entire supervisor Kernel?</p>
+</aside>
+
+<section class="modmeta" aria-label="Module overview">
+ <h2>Module 7: Security &amp; Protection (Weeks 14–15)</h2>
+ <p><strong>Module Asset Managed:</strong> System access credentials, privilege boundaries, process isolation domains, and authentication parameters.</p>
+ <p><strong>The Core Problem:</strong> How do we ensure that user Alice cannot read user Bob's files, and that malware cannot exploit a bug to seize control of the entire supervisor Kernel?</p>
+</section>
+
+<div class="layout">
+<nav id="toc" aria-label="Table of contents">
+ <p class="toc-title">Module 7 Contents</p>
+ <ul>
+  <li><a href="#lecture-22">L22 Access Control</a></li>
+  <li><a href="#lecture-23">L23 Authentication</a></li>
+  <li><a href="#lecture-24">L24 Program Exploits</a></li>
+  <li><a href="#lecture-25">L25 Encryption</a></li>
+  <li><a href="#lecture-26">L26 Firewalls &amp; IDS</a></li>
+  <li><a href="#lecture-27">L27 Isolation</a></li>
+  <li><a href="#lecture-28">L28 Retrospective</a></li>
+  <li><a href="#lab-07">Lab 07 Buffer Overflow</a></li>
+ </ul>
+</nav>
+
+<main>
+
+<!-- ============ LECTURE 22 ============ -->
+<details class="card" id="lecture-22" open>
+<summary><span class="num">L22</span> Lecture 22: Access Control</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Apply an access control matrix and distinguish an Access Control List (ACL) from a capability token.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>Module 5 (L17: File Abstraction &amp; Directory Topology).</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Hotel Room Ledger vs. The Physical Room Key.</strong> Imagine a hotel security framework. One design approach checks an explicit sheet clipped right onto the door frame: "Who is allowed into Room 204?" (ACL, resource-centric). Another design completely ignores the doors and hands you an electronic keycard token that simply works instantly on whichever lock it fits (Capability, user-centric).</p></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>Stateless Network File System Mounting Rules vs. Cryptographic JWT Bearer Tokens.</strong> An ACL acts like a firewall rule table mapped directly onto a disk block node, while a capability behaves like an unforgeable, kernel-signed memory address descriptor held by a running thread.</p></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>Relies On: Module 1 (L02: Dual-Mode Barrier)</strong> — Relies on Ring 0 isolation to guarantee that user-space processes cannot modify their own capability tokens or rewrite resource security bits.</li>
+<li><strong>Feeds Into: L23 (Authentication)</strong> — Access control lists only work if the system possesses an unshakeable mechanism to verify the identity of the user calling them.</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p>An operating system manages file security using Protection Domains. This architecture is mathematically mapped using an Access Control Matrix, where rows represent subjects and columns represent resource objects.</p>
+<p>Because matrices are massive and sparse, production kernels use two opposing bookkeeping methodologies: ACLs decompose the matrix by columns, attaching a strict authorization list directly to the resource itself. Capabilities decompose the matrix by rows, handing secure, unforgeable tokens directly to the user or process context.</p></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">Access Control Matrix</code>A conceptual grid mapping user domains against system objects to define structural read, write, and execute permissions.</li>
+<li><code class="chip">ACL (Access Control List)</code>A column-oriented optimization where resource permissions are tracked directly on the asset container.</li>
+<li><code class="chip">Capability</code>A row-oriented security optimization where unforgeable access tokens are carried and presented by the active user process.</li>
+<li><code class="chip">Protection Domain</code>The bounded environment profile determining which operations a thread is permitted to execute across various system objects.</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><p><strong>Linux Standard File Permission Vector:</strong> Standard Unix file systems compact ACL architecture down to 9 simple permission bits: Owner, Group, and Others. A file displaying <code class="chip">rwxr-xr--</code> indicates that the owner has full read, write, and execute permissions, group members can read and execute, and all external system callers can strictly read the asset contents without modifying them.</p></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Matrix Verification Challenge.</strong> Sketch a 4x4 Access Control Matrix on the chalkboard listing users (Alice, Bob, Charlie) and resources (file1.txt, /dev/tty0). Rapidly shout out target scenarios: "Can Bob write to file1?" or "Can Charlie execute /dev/tty0?" Have students call out answers directly from the grid lines to practice reading sparse matrix definitions.</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 22">CS 301: Operating Systems
+  └── Module 7: Security &amp; Protection
+        └── L22: Access Control
+              └── Matrix Optimization → Resource ACLs vs User Capabilities</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LECTURE 23 ============ -->
+<details class="card" id="lecture-23">
+<summary><span class="num">L23</span> Lecture 23: Authentication</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Compare password-based and biometric authentication models and identify an unalterable systemic vulnerability in each design.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>L22 (Access Control).</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Secret Password, The Safe Key, and The Fingerprint.</strong> Proving who you are down at a secure facility relies on three core human vectors: Something you know (a typed combination password), Something you have (a physical brass key or access fob token), or Something you are (your physical fingerprint pattern layout).</p></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>A SHA-256 One-Way String Hashing Engine vs. A Heuristic Biometric Vector Sensor Reader.</strong> Software credential checks run a string through an arithmetic compression function to match a database key, while biometric scanners translate analog organic geometric structures into static data signatures.</p></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>Feeds Into: L24 (Program Exploits)</strong> — A failure to secure stored authentication keys allows rogue threads to hijack system control streams.</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p>Before the kernel can enforce access permissions, it must establish a verified identity through Authentication Factors. Passwords represent "something you know." To prevent local storage theft, modern kernels never save plaintext characters; instead, they run inputs through a one-way mathematical function appended with a random string (Salted Hash).</p>
+<p>Biometrics represent "something you are." While passwords can be leaked, they can easily be altered or reset; biometric traits can never be "reset" if compromised, permanently changing the baseline risk calculations of a secure system topology.</p></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">Authentication Factor</code>An explicit operational category used to verify a user's digital identity boundaries (Knowledge, Possession, Inherence).</li>
+<li><code class="chip">Multi-Factor Authentication (MFA)</code>Requiring a user to validate two or more distinct authentication categories before granting entry access.</li>
+<li><code class="chip">Salted Hash</code>Appending a random sequence of characters to a user password before passing it through a cryptographic one-way hashing function to neutralize dictionary lookup attacks.</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><p><strong>Windows Hello vs Plaintext Form Validation:</strong> When a user authenticates using a plaintext password string, a local database breach exposes the target vector to dictionary attacks if left unhashed. Windows Hello converts local fingerprint sensor scans into a localized hardware-locked cryptographic signature key, preventing raw biometric imagery data from ever leaking into standard storage channels.</p></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Banking Login Architecture Challenge.</strong> Split the classroom into small groups. Task them with drafting the authentication pipeline flow diagram for a high-security banking utility. Have them defend their chosen multi-factor constraints and evaluate how their app will handle a scenario where a user's biometric baseline signature is leaked.</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 23">CS 301: Operating Systems
+  └── Module 7: Security &amp; Protection
+        └── L23: Authentication
+              └── Identity Verification → Knowledge vs Inherence → Salted Hashing Mathematics</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LECTURE 24 ============ -->
+<details class="card" id="lecture-24">
+<summary><span class="num">L24</span> Lecture 24: Program Exploits</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Explain how a stack buffer overflow hijacks CPU control flow pipelines and state the protective roles of ASLR and Stack Canaries.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>Module 2 (L05: Process Stack Segment).</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Overfilled Storage Shelf.</strong> Imagine a warehouse shelf layout where you are assigned a tight, fixed box slot (The Allocated Buffer). Directly next to your boundary space sits an emergency button controlling the warehouse electrical grid (The Function Return Address). If the floor manager leaves you unchecked, you can overfill your shelf with extra boxes until they spill straight onto the neighboring slot, knocking something important over and halting the facility.</p></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>An Unchecked String Data Copy Operation.</strong> A buffer overflow mimics a linear streaming copy process that lacks maximum boundary index caps, allowing incoming string data bytes to spill past local variables and rewrite administrative control flags.</p></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>Relies On: Module 2 (L05: Process Anatomy)</strong> — Exploits the contiguous structural alignment of variables on the active memory stack frame segment layout.</li>
+<li><strong>Feeds Into: L27 (Modern Isolation Paradigms)</strong> — The persistent danger of memory-unsafe code vulnerabilities serves as the primary engineering catalyst for building sandboxes.</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p>Writing data past a fixed-size buffer's end can overwrite adjacent memory coordinates. In memory-unsafe languages like C, functions like strcpy() read input continuously until a null terminator appears.</p>
+<p>This input fills the stack frame upward, overwriting local variables and eventually smashing the saved Return Address. When the function finishes, the CPU reads this corrupted pointer and redirects execution straight to code chosen by the attacker. Modern systems mitigate this using ASLR, which randomizes memory locations on every boot, and Stack Canaries, which place a secret token right before the return address to detect corruption.</p></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">Buffer Overflow</code>A critical software security defect where data spills past an allocated memory buffer boundary to corrupt neighboring memory values.</li>
+<li><code class="chip">Stack Smashing</code>Deliberately corrupting a process's stack frame memory by overflowing local variables to overwrite execution tracking flags.</li>
+<li><code class="chip">Return Address</code>A vital execution tracking address saved on the stack frame that instructs the CPU where to resume execution once a function ends.</li>
+<li><code class="chip">ASLR (Address Space Layout Randomization)</code>A security defense that randomizes the memory address locations of the stack, heap, and libraries on every single execution run.</li>
+<li><code class="chip">Stack Canary</code>A secret, random value placed by the compiler between local buffers and the return address to detect stack frame corruption.</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><p>A classic <code class="chip">strcpy()</code>-into-fixed-buffer vulnerability demonstrates this defect. If a function declares <code class="chip">char buffer[10];</code> and immediately executes <code class="chip">strcpy(buffer, input);</code> without validating that input is under 10 bytes, any payload larger than the frame limit will spill directly into the stack management parameters.</p></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Byte-Level Stack Diagramming Race.</strong> Draw a clean memory layout grid of stack bytes on the blackboard, showing the buffer array, the canary, and the return address. Give a student a 20-character text string and have them fill the memory cells block-by-block from the bottom up until they physically cross the canary boundary, identifying the exact index byte that hijacks the execution pointer.</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 24">CS 301: Operating Systems
+  └── Module 7: Security &amp; Protection
+        └── L24: Program Exploits
+              └── Stack Smashing → Return Address Hijacking → Canaries &amp; ASLR Defenses</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LECTURE 25 ============ -->
+<details class="card" id="lecture-25">
+<summary><span class="num">L25</span> Lecture 25: Encryption Fundamentals</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Distinguish symmetric from asymmetric encryption architectures and name where each shows up in modern computer networks.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>Module 6 (Network Data Streams).</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Shared House Key vs. The Mailbox Slot.</strong> Symmetric Encryption behaves exactly like a shared house key—one single key locks the front door and unlocks the front door. It is incredibly fast, but requires securely sharing that secret key in advance. Asymmetric Encryption behaves exactly like a street-side mailbox slot. Anyone passing by can drop a letter through the open slot (The Public Key), but they cannot reach inside to steal anything back out. Only the key-holder holding the master back panel key can open it to retrieve the mail (The Private Key).</p></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>A Shared Private Cipher String vs. A Public/Private Mathematical Prime Coordinate Pair.</strong> Symmetric cryptography processes data using high-speed block bit-shifting ciphers, while asymmetric cryptography executes large modular exponentiation loops.</p></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>Feeds Into: L26 (Firewalls &amp; IDS)</strong> — High-strength hybrid encryption masks data payloads, forcing modern Intrusion Detection Systems to evaluate traffic metadata shapes instead of raw string keywords.</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p>Operating systems must protect data privacy across non-volatile disks and network links. Symmetric Encryption (e.g., AES) utilizes a single secret key shared between parties to execute both encryption and decryption loops; it is computationally fast but suffers from key distribution scaling issues.</p>
+<p>Asymmetric Encryption (e.g., RSA) uses a mathematically bound key pair: a public key to encrypt and a private key to decrypt. Because asymmetric math is too slow for heavy block streams, real production environments implement Hybrid Encryption: asymmetric crypto securely handles the initial handshake key exchange, and then both nodes shift down to high-speed symmetric ciphers to process bulk data.</p></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">Symmetric Encryption (AES)</code>A cryptographic model where a single, identical secret key handles both data scrambling and unscrambling pipelines.</li>
+<li><code class="chip">Asymmetric Encryption (RSA)</code>A dual-key architecture where data locked by a public key can only be unlocked by a matching private key.</li>
+<li><code class="chip">Key Exchange</code>The structural protocol dance where two distant computing systems securely establish a shared secret token over an insecure channel.</li>
+<li><code class="chip">Hybrid Encryption</code>Combining asymmetric cryptography (for secure key exchange) with symmetric cryptography (for fast data stream processing).</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><p><strong>HTTPS/TLS Connection Architecture:</strong> Modern web traffic implements hybrid structures. The system leverages RSA asymmetric public keys during the initial network handshake to securely negotiate a session token, and immediately shifts to high-speed AES symmetric blocks to handle bulk page rendering data.</p></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Handshake Mapping Race.</strong> Draw the chronological vertical lines of a network TLS handshake on the whiteboard. Have students step up with markers to label exactly which step of the negotiation is driven by asymmetric algorithms (RSA Key Exchange) and where the pipeline transitions to symmetric cryptography (AES Payload Stream).</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 25">CS 301: Operating Systems
+  └── Module 7: Security &amp; Protection
+        └── L25: Encryption Fundamentals
+              └── Symmetric (AES) vs Asymmetric (RSA) → Hybrid HTTPS Handshakes</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LECTURE 26 ============ -->
+<details class="card" id="lecture-26">
+<summary><span class="num">L26</span> Lecture 26: Firewalls &amp; Intrusion Detection</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Distinguish a firewall's blocking role from an IDS's detection role given a sample network log trace.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>L25 (Encryption Fundamentals), network ports and sockets.</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Club Bouncer vs. The Undercover Camera Guard.</strong> A Firewall acts exactly like a large bouncer checking IDs right at the entrance door of an elite nightclub; they enforce static rules to block entry completely before anyone sets foot inside. An Intrusion Detection System (IDS) acts exactly like an undercover security guard watching camera feeds inside the building floors; they don't stop anyone at the door, but if they see suspicious behavior already happening inside, they instantly ring an alarm.</p></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>A Stateless Header Network Filter Router vs. A Deep Packet Inspection Analytical Aggregator Engine.</strong> Firewalls run fast bit checks on incoming IP/Port parameters, while an IDS buffers deep transaction logs to match data chunks against documented exploit signature footprints.</p></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>Relies On: Module 6 (I/O &amp; Network Drivers)</strong> — Hooks directly into the kernel's low-level network driver packet rings to inspect socket data before it reaches user space.</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p>Network protection requires dual defense boundaries. Firewalls act as gatekeepers, enforcing security policies at the network border by filtering traffic based on static packet header metrics (Source IP, Destination IP, Port Numbers).</p>
+<p>Intrusion Detection Systems (IDS) act as internal monitors, analyzing traffic streams already flowing inside the network. An IDS uses two core strategies: Signature-based detection, scanning for known patterns matching a library of malicious exploit profiles, and Heuristic/Anomaly-based detection, establishing a statistical baseline of normal network behavior and flagging deviations.</p></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">Firewall</code>A boundary security component that permits or blocks network traffic frames based on a predetermined set of filtering rule criteria.</li>
+<li><code class="chip">Port Filtering</code>Blocking or opening explicit software communication channels (e.g., Port 80 for HTTP, Port 22 for SSH) to restrict vector exposure.</li>
+<li><code class="chip">IDS (Intrusion Detection System)</code>An internal network data scanner that tracks packet streams already passing inside system boundaries to sound alarms on suspicious behaviors.</li>
+<li><code class="chip">Signature-Based vs. Anomaly-Based</code>Scanning for known malicious code string patterns vs. flagging deviations from normal statistical baseline behaviors.</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><p><strong>Windows Defender vs a Out-of-Hours Telemetry IDS:</strong> A standard firewall rule block acts at the border, dropping unauthorized incoming connection requests targeting closed terminal lines. If a valid user logs in successfully at 3:00 AM but immediately initiates an abnormal, multi-gigabyte data export loop, the firewall remains blind; catching this threat requires an anomaly-based IDS to flag the off-hours pattern deviation.</p></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Raw Log Diagnostic Sorting Game.</strong> Hand students sheets displaying a short 10-line network traffic log containing mixed events (e.g., blocked IP sweeps, port scans, sudden massive outbound packet floods). Have them sort the lines into two columns: events caught by static firewall port filters vs events requiring an IDS analyzer.</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 26">CS 301: Operating Systems
+  └── Module 7: Security &amp; Protection
+        └── L26: Firewalls &amp; IDS
+              └── Border Port Filtering → Deep Packet Analysis → Signature vs Anomaly Logs</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LECTURE 27 ============ -->
+<details class="card" id="lecture-27">
+<summary><span class="num">L27</span> Lecture 27: Modern Isolation Paradigms</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Compare the structural isolation boundaries of sandboxing, namespaces, and containers against full hardware hypervisors.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>L24 (Program Exploits), Module 2 (Process Identification).</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Padded Room, The Apartment Complex, and The Portable Crate.</strong> A Sandbox is like a padded room; a thread can run inside it but cannot break anything outside. Namespaces are like separate apartments inside a single massive building; all tenants share the same underlying pipes and framework (The Shared Host Kernel), but partition walls block them from looking into each other's living rooms. A Container is like wrapping that entire apartment into a convenient steel shipping crate that you can pick up and move to another building seamlessly—it boots instantly because it reuses whatever local foundation is already there.</p></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>Virtual Machine Hardware Emulation vs. OS-Level Native Monolithic System Call Hooking.</strong> Containers function as advanced user-space environments wrapped inside native isolation boundaries, where the kernel leverages internal mapping tables to restrict visibility without running an independent guest OS.</p></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>Relies On: Module 2 (Process Management)</strong> — Leverages process clone namespace flags (<code class="chip">CLONE_NEWPID</code>) to split process trees into isolated tracking graphs.</li>
+<li><strong>Relies On: Module 3 (Memory Management)</strong> — Employs memory framework limits (cgroups) to enforce strict physical memory allocation caps around isolated containers.</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p>A container isn't a new form of virtualization; it is a clever reuse of core kernel features. While Hypervisors emulate physical hardware layers to run a full independent Guest Operating System, Containers run application code natively right on the host kernel.</p>
+<p>This is achieved by wrapping processes inside Namespaces (isolating system visibility for PIDs, Networks, and Mount paths) and Control Groups / cgroups (metering resource allocation caps like CPU time slices and maximum RAM consumption bounds). This avoids the heavy boot and storage tax of full VMs.</p></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">Sandbox</code>A highly restrictive execution environment that intercepts and blocks dangerous application system calls to prevent system modifications.</li>
+<li><code class="chip">Namespace</code>A native kernel configuration feature that isolates system resource visibility (PIDs, Networks, Mounts) for a targeted group of processes.</li>
+<li><code class="chip">Cgroup (Control Group)</code>A kernel resource throttling primitive used to cap maximum allocation consumption thresholds (CPU, RAM, Storage) around a process stream.</li>
+<li><code class="chip">Container</code>A portable, self-contained user-space isolation runtime package that executes natively on a shared host kernel.</li>
+<li><code class="chip">Hypervisor</code>A virtualization abstraction layer that emulates physical hardware components, requiring an independent guest operating system layer.</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><p><strong>Docker Container Isolation vs a Full QEMU Virtual Machine:</strong> A full virtual machine emulates an entire virtual disk, virtual PCI buses, and boots an independent kernel binary, consuming gigabytes of RAM. A Docker container shares the host's running kernel, executing instructions at bare-metal speeds while utilizing namespace wrappers to render peer host processes completely invisible.</p></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Host Kernel Resource Share Audit.</strong> Draw a line down the center of the chalkboard, labeling one side "Shared with Host Kernel" and the other side "Isolated Container Sandbox Boundary." Call out real technical components—such as the sys_schedulercore clock code, a raw /dev/eth0 network interface route table, a global disk storage inode array, or an internal container /tmp folder log directory. Have students vote where each component lands to analyze why containers boot in milliseconds compared to full virtual machines.</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 27">CS 301: Operating Systems
+  └── Module 7: Security &amp; Protection
+        └── L27: Modern Isolation Paradigms
+              └── Hypervisor Hardware Emulation vs Native Container Pipelines → Namespaces (View) + cgroups (Limits)</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LECTURE 28 ============ -->
+<details class="card" id="lecture-28">
+<summary><span class="num">L28</span> Lecture 28: Grand Course Retrospective</summary>
+<article class="body">
+<section class="sec"><h3>🎯 Objective</h3><p>Trace a single user transaction chronologically through all seven kernel manager subsystems in sequence, mapping out every active privilege ring crossover.</p></section>
+<section class="sec"><h3>🛑 Prerequisites</h3><p>Modules 1 through 7 (All Prior Lectures).</p></section>
+<section class="sec"><h3>🎪 Analogy 1 (Everyday Life)</h3><p><strong>The Grand City Symphony.</strong> Return to the very first opening analogy from Lecture 00: the city with fifty people who all believe they own the entire infrastructure footprint. This final lecture opens the back panel of the master grandfather clock, showing how the scheduling cogs, the memory allocation weights, the file system springs, the driver interfaces, and the security access guard chains all mesh together into a single continuous, ticking movement to maintain that convincing illusion for the human observer.</p></section>
+<section class="sec"><h3>💻 Analogy 2 (Pure Technical)</h3><p><strong>A Comprehensive End-to-End Core Thread Architecture Trace.</strong> A full retrospective behaves identically to tracing an elite network telemetry probe packet from its entry across a firewall hardware socket down through driver interfaces, memory block registers, database locks, and output queues.</p></section>
+<section class="sec"><h3>🔗 System Cohesion Matrix</h3><ul>
+<li><strong>The Master Nexus Point:</strong> Synchronizes all prior 27 lectures into a single, cohesive structural ecosystem mapping timeline.</li></ul></section>
+<section class="sec"><h3>🔍 Core Breakdown</h3>
+<p>An operating system is a synchronized clockwork engine. We synthesize the semester by tracing a single user action—double-clicking a file icon to open a document file text log—end-to-end through every layer of the curriculum:</p>
+<p>The user mouse click fires an electronic hardware interrupt handled by the I/O subsystem interface (Module 6).</p>
+<p>The window shell captures the interrupt signal, checks user credentials against the system Access Control List (Module 7), and fires a fork() system call trap barrier (Module 1 &amp; 2).</p>
+<p>The kernel instantiates a fresh Process Control Block (PCB) entry, allocating task structures inside supervisor space (Module 2).</p>
+<p>As the thread launches, it triggers a page fault exception, prompting the virtual memory manager to allocate physical frames and populate MMU page table bits (Module 3).</p>
+<p>The thread requests file bytes, prompting the file system to parse absolute paths, read metadata inode blocks, and copy data chunks off storage drive sectors safely protected behind journal consistency checkpoints (Module 5).</p></section>
+<section class="sec"><h3>🏷️ Lexicon / Terms</h3><ul class="terms">
+<li><code class="chip">System Synthesis</code>The complete cross-functional tracing of kernel subsystems acting concurrently to execute an individual software application workload thread.</li></ul></section>
+<section class="sec"><h3>🛠️ Practical Example</h3><p><strong>The <code class="chip">strace cat resume.txt</code> Telemetry Case Study:</strong> Running a system trace on a digital text print utility exposes the cross-functional pipeline mechanics. The resulting print stream exposes execve creating the process space (Module 2), brk tracking memory allocations (Module 3), openat fetching the target directory inode vector pointer (Module 5), and write copying the resulting buffer string directly out to standard character output files (Module 6).</p></section>
+<section class="sec"><h3>🎯 Interactive Classroom Activity</h3><p><strong>The Final Exam End-to-End Narration Relay.</strong> Present the class with a complex synthesis scenario: "A user opens a password-protected spreadsheet file from an external USB flash drive." Call on individual students at random around the room. Each student must narrate exactly what the operating system kernel is doing under the hood for one specific step, then pass the baton to the next student to cover the subsequent module subsystem until the story travels smoothly from hardware interrupts up to user-space drawing loops. This doubles as the ultimate interactive final exam review session.</p></section>
+<section class="sec"><h3>🌿 Mindmap Branch</h3><pre class="mind" tabindex="0" aria-label="Mindmap branch for Lecture 28">CS 301: Operating Systems
+  └── Module 7: Security &amp; Protection
+        └── L28: Course Retrospective
+              └── System Call End-to-End Pipeline Walkthroughs → Core Synthesis Master Map</pre></section>
+<section class="sec"><h3>🌐 Interactive Mindmap URL</h3><p class="url">https://your-github-username.github.io/os-mindmap/index.html</p></section>
+</article>
+</details>
+
+<!-- ============ LAB 07 ============ -->
+<details class="card" id="lab-07">
+<summary><span class="num">LAB</span> Lab 07: Exploiting and Patching a Vulnerable Buffer Overflow Binary</summary>
+<article class="body">
+<section class="sec"><h3>🧪 Lab Assignment Target</h3><p>Lab 7: Exploiting and Patching a Vulnerable Buffer Overflow Binary</p></section>
+<section class="sec"><h3>📝 Task Description</h3><p>Students receive a compiled C utility program that contains an unchecked input loop. Working within a sandboxed virtual machine environment, students use gdb register tracking to analyze stack layouts, craft an input payload string to overwrite the program counter return pointer, trigger a privilege escalation debug shell, and then refactor the original C source layout to completely patch the vulnerability.</p></section>
+<section class="sec"><h3>⚖️ Grading Weight Validation</h3><p>Automated grading scripts ingest the student's payload string to test if it successfully triggers exploitation on the unpatched binary, and then compiles their updated code to verify that it blocks all subsequent overflow attempts (Counts toward the 45% Lab block).</p></section>
+</article>
+</details>
+
+</main>
+</div>
+</div>
+
+<footer>CS-301: Operating Systems — Module 7: Security &amp; Protection (Weeks 14–15)</footer>
+
+<script>
+(function(){
+ var root=document.documentElement,btn=document.getElementById('theme-toggle');
+ // Dark/light toggle, persisted
+ try{var s=localStorage.getItem('theme');if(s){root.setAttribute('data-theme',s)}else if(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches){root.setAttribute('data-theme','dark')}}catch(e){}
+ btn.addEventListener('click',function(){
+  var n=root.getAttribute('data-theme')==='dark'?'light':'dark';
+  root.setAttribute('data-theme',n);
+  try{localStorage.setItem('theme',n)}catch(e){}
+ });
+ // Collapsible cards: open target card on link click / hash load
+ var cards=[].slice.call(document.querySelectorAll('details.card'));
+ function openHash(){var id=location.hash.slice(1),el=id&&document.getElementById(id);if(el&&el.tagName==='DETAILS'){el.open=true}}
+ window.addEventListener('hashchange',openHash);openHash();
+ // Scroll-spy
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ function setActive(id){links.forEach(function(a){var on=a.getAttribute('href')==='#'+id;a.classList.toggle('active',on);if(on){a.setAttribute('aria-current','true');var nav=document.getElementById('toc');if(nav.scrollWidth>nav.clientWidth&&nav.scrollHeight<=nav.clientHeight+2){nav.scrollLeft=a.offsetLeft-20}}else{a.removeAttribute('aria-current')}})}
+ if('IntersectionObserver' in window){
+  var vis={};
+  var io=new IntersectionObserver(function(es){
+   es.forEach(function(e){vis[e.target.id]=e.isIntersecting});
+   for(var i=0;i<cards.length;i++){if(vis[cards[i].id]){setActive(cards[i].id);return}}
+  },{rootMargin:'-20% 0px -60% 0px'});
+  cards.forEach(function(c){io.observe(c)});
+ }
+ setActive('lecture-22');
+ // Print: expand all cards, restore afterwards
+ var prev=[];
+ window.addEventListener('beforeprint',function(){prev=cards.map(function(c){return c.open});cards.forEach(function(c){c.open=true})});
+ window.addEventListener('afterprint',function(){cards.forEach(function(c,i){c.open=prev[i]})});
+})();
+</script>
+</body>
+</html>
