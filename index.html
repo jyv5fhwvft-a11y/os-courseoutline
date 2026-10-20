@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 301 · Operating Systems — Master Course Map</title>
+<style>
+  /* ====== GLOBAL STYLES ====== */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: #0F172A;
+    color: #E2E8F0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ====== HERO HEADER ====== */
+  .hero {
+    padding: 10vh 5vw 6vh;
+    text-align: center;
+    background: radial-gradient(ellipse at top, rgba(59,130,246,0.15), transparent 70%);
+    border-bottom: 1px solid #1E293B;
+  }
+  .hero-badge {
+    display: inline-block;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 8px 20px;
+    border-radius: 999px;
+    margin-bottom: 3vh;
+    border: 2px solid #3B82F6;
+    color: #60A5FA;
+    background: rgba(59,130,246,0.08);
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5.5vw, 4rem);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 2vh;
+    background: linear-gradient(135deg, #60A5FA, #A78BFA, #F0ABFC, #FDE047);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    font-size: clamp(1rem, 1.6vw, 1.25rem);
+    color: #94A3B8;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  /* ====== MAIN CONTAINER ====== */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 6vh 5vw 10vh;
+  }
+
+  /* ====== MODULE GRID ====== */
+  .modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2vh;
+  }
+
+  /* ====== MODULE CARDS ====== */
+  .module-card {
+    display: flex;
+    flex-direction: column;
+    padding: 3vh 2.5vw;
+    border-radius: 16px;
+    border: 2px solid #1E293B;
+    background: #111C33;
+    text-decoration: none;
+    color: #E2E8F0;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .module-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+    border-color: #3B82F6;
+  }
+  .module-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 4px;
+    background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .module-card:hover::before { opacity: 1; }
+
+  /* Color themes for each module */
+  .m1:hover { border-color: #60A5FA; box-shadow: 0 12px 30px rgba(59,130,246,0.15); }
+  .m1::before { background: #3B82F6; }
+  .m1 .module-num { color: #60A5FA; }
+  
+  .m2:hover { border-color: #34D399; box-shadow: 0 12px 30px rgba(16,185,129,0.15); }
+  .m2::before { background: #10B981; }
+  .m2 .module-num { color: #34D399; }
+  
+  .m3:hover { border-color: #A78BFA; box-shadow: 0 12px 30px rgba(139,92,246,0.15); }
+  .m3::before { background: #8B5CF6; }
+  .m3 .module-num { color: #A78BFA; }
+  
+  .m4:hover { border-color: #F87171; box-shadow: 0 12px 30px rgba(239,68,68,0.15); }
+  .m4::before { background: #EF4444; }
+  .m4 .module-num { color: #F87171; }
+  
+  .m5:hover { border-color: #FBBF24; box-shadow: 0 12px 30px rgba(245,158,11,0.15); }
+  .m5::before { background: #F59E0B; }
+  .m5 .module-num { color: #FBBF24; }
+  
+  .m6:hover { border-color: #5EEAD4; box-shadow: 0 12px 30px rgba(20,184,166,0.15); }
+  .m6::before { background: #14B8A6; }
+  .m6 .module-num { color: #5EEAD4; }
+  
+  .m7:hover { border-color: #BEF264; box-shadow: 0 12px 30px rgba(132,204,22,0.15); }
+  .m7::before { background: #84CC16; }
+  .m7 .module-num { color: #BEF264; }
+
+  .module-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5vw;
+    margin-bottom: 2vh;
+  }
+  .module-num {
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 1.8rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .module-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+  .module-desc {
+    font-size: 0.95rem;
+    color: #94A3B8;
+    line-height: 1.5;
+    flex-grow: 1;
+  }
+  .module-arrow {
+    display: inline-block;
+    margin-top: 2vh;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #475569;
+    transition: color 0.2s ease;
+  }
+  .module-card:hover .module-arrow {
+    color: #F1F5F9;
+  }
+</style>
+</head>
+<body>
+
+  <!-- HERO SECTION -->
+  <div class="hero">
+    <div class="hero-badge">🎓 CS-301 · OPERATING SYSTEMS</div>
+    <h1>Master Course Map</h1>
+    <p>Select a module to access lectures, analogies, code examples, and interactive activities.</p>
+  </div>
+
+  <!-- MODULES GRID -->
+  <div class="container">
+    <div class="modules-grid">
+
+      <!-- Module 1 -->
+      <a href="module1.html" class="module-card m1">
+        <div class="module-header">
+          <div class="module-num">M1</div>
+          <div class="module-title">OS Structure & Design</div>
+        </div>
+        <div class="module-desc">
+          The boundary layer between hardware and software. Explore the five architectural paradigms, the dual-mode barrier, syscalls, and the boot process.
+        </div>
+        <div class="module-arrow">Explore Module 1 →</div>
+      </a>
+
+      <!-- Module 2 -->
+      <a href="module2.html" class="module-card m2">
+        <div class="module-header">
+          <div class="module-num">M2</div>
+          <div class="module-title">Process Management</div>
+        </div>
+        <div class="module-desc">
+          CPU cores and execution time. Learn about PCBs, fork/exec, FCFS, SJF, Round Robin, MLFQ scheduling, and multithreading.
+        </div>
+        <div class="module-arrow">Explore Module 2 →</div>
+      </a>
+
+      <!-- Module 3 -->
+      <a href="module3.html" class="module-card m3">
+        <div class="module-header">
+          <div class="module-num">M3</div>
+          <div class="module-title">Memory Management</div>
+        </div>
+        <div class="module-desc">
+          RAM chips and translation registers. Dive into base-and-bound, paging, TLB caching, virtual memory, and page replacement algorithms.
+        </div>
+        <div class="module-arrow">Explore Module 3 →</div>
+      </a>
+
+      <!-- Module 4 -->
+      <a href="module4.html" class="module-card m4">
+        <div class="module-header">
+          <div class="module-num">M4</div>
+          <div class="module-title">Process Synchronization</div>
+        </div>
+        <div class="module-desc">
+          Shared global states and heap variables. Master race conditions, mutexes, critical sections, and deadlock topologies.
+        </div>
+        <div class="module-arrow">Explore Module 4 →</div>
+      </a>
+
+      <!-- Module 5 -->
+      <a href="module5.html" class="module-card m5">
+        <div class="module-header">
+          <div class="module-num">M5</div>
+          <div class="module-title">File & Storage Management</div>
+        </div>
+        <div class="module-desc">
+          HDDs, SSDs, and file metadata. Understand disk geometry, file abstraction, inodes, crash consistency, and journaling.
+        </div>
+        <div class="module-arrow">Explore Module 5 →</div>
+      </a>
+
+      <!-- Module 6 -->
+      <a href="module6.html" class="module-card m6">
+        <div class="module-header">
+          <div class="module-num">M6</div>
+          <div class="module-title">I/O Device Management</div>
+        </div>
+        <div class="module-desc">
+          Drivers, IRQs, and DMA. Explore polling, interrupts, direct memory access, and the unified /dev abstraction.
+        </div>
+        <div class="module-arrow">Explore Module 6 →</div>
+      </a>
+
+      <!-- Module 7 -->
+      <a href="module7.html" class="module-card m7">
+        <div class="module-header">
+          <div class="module-num">M7</div>
+          <div class="module-title">Security & Protection</div>
+        </div>
+        <div class="module-desc">
+          Credentials, privileges, and isolation. Cover access control, authentication, buffer overflows, encryption, and containers.
+        </div>
+        <div class="module-arrow">Explore Module 7 →</div>
+      </a>
+
+    </div>
+  </div>
+
+</body>
+</html>
